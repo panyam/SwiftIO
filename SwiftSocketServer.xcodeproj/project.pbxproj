@@ -17,10 +17,18 @@
 		F7CF64661C2095E600493204 /* CFSocketClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64601C20958D00493204 /* CFSocketClientTransport.swift */; };
 		F7CF64671C2095E600493204 /* CFSocketServerTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */; };
 		F7CF64681C2095E600493204 /* Transport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64621C20958D00493204 /* Transport.swift */; };
+		F7CF646A1C209A1700493204 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF64691C209A1700493204 /* CoreFoundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		F7CF64461C2094B900493204 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CF64311C2094B900493204 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F7CF64391C2094B900493204;
+			remoteInfo = SwiftSocketServer;
+		};
+		F7CF646B1C209CCA00493204 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F7CF64311C2094B900493204 /* Project object */;
 			proxyType = 1;
@@ -53,6 +61,7 @@
 		F7CF64601C20958D00493204 /* CFSocketClientTransport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFSocketClientTransport.swift; sourceTree = "<group>"; };
 		F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFSocketServerTransport.swift; sourceTree = "<group>"; };
 		F7CF64621C20958D00493204 /* Transport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transport.swift; sourceTree = "<group>"; };
+		F7CF64691C209A1700493204 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F7CF646A1C209A1700493204 /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,7 +94,7 @@
 		F7CF64301C2094B900493204 = {
 			isa = PBXGroup;
 			children = (
-				F7CF645F1C20958D00493204 /* Sources */,
+				F7CF64691C209A1700493204 /* CoreFoundation.framework */,
 				F7CF643C1C2094B900493204 /* SwiftSocketServer */,
 				F7CF64481C2094B900493204 /* SwiftSocketServerTests */,
 				F7CF64591C2094F600493204 /* SwiftSocketServerDemo */,
@@ -105,6 +115,7 @@
 		F7CF643C1C2094B900493204 /* SwiftSocketServer */ = {
 			isa = PBXGroup;
 			children = (
+				F7CF645F1C20958D00493204 /* Sources */,
 				F7CF643D1C2094B900493204 /* SwiftSocketServer.h */,
 				F7CF643F1C2094B900493204 /* Info.plist */,
 			);
@@ -135,7 +146,8 @@
 				F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */,
 				F7CF64621C20958D00493204 /* Transport.swift */,
 			);
-			path = Sources;
+			name = Sources;
+			path = ../Sources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -199,6 +211,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				F7CF646C1C209CCA00493204 /* PBXTargetDependency */,
 			);
 			name = SwiftSocketServerDemo;
 			productName = SwiftSocketServerDemo;
@@ -299,6 +312,11 @@
 			isa = PBXTargetDependency;
 			target = F7CF64391C2094B900493204 /* SwiftSocketServer */;
 			targetProxy = F7CF64461C2094B900493204 /* PBXContainerItemProxy */;
+		};
+		F7CF646C1C209CCA00493204 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F7CF64391C2094B900493204 /* SwiftSocketServer */;
+			targetProxy = F7CF646B1C209CCA00493204 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -480,6 +498,7 @@
 				F7CF64501C2094B900493204 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F7CF64511C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServerTests" */ = {
 			isa = XCConfigurationList;
@@ -488,6 +507,7 @@
 				F7CF64531C2094B900493204 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F7CF645C1C2094F600493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServerDemo" */ = {
 			isa = XCConfigurationList;
@@ -496,6 +516,7 @@
 				F7CF645E1C2094F600493204 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

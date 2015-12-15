@@ -51,13 +51,17 @@ public class CFSocketServerTransport : ServerTransport
      */
     private var isRunning = false
     private var stopped = false
-    var serverPort : UInt16 = DEFAULT_SERVER_PORT
-    var serverPortV6 : UInt16 = DEFAULT_SERVER_PORT
+    public var serverPort : UInt16 = DEFAULT_SERVER_PORT
+    public var serverPortV6 : UInt16 = DEFAULT_SERVER_PORT
     private var serverSocket : CFSocket?
     private var serverSocketV6 : CFSocket?
-    var connectionFactory : ConnectionFactory?
+    public var connectionFactory : ConnectionFactory?
     
-    func start()
+    public init()
+    {
+    }
+    
+    public func start()
     {
         if isRunning {
             NSLog("Server is already running")
@@ -69,6 +73,9 @@ public class CFSocketServerTransport : ServerTransport
         initSocket()
     }
     
+    public func stop() {
+    }
+
     private func initSocket()
     {
         let selfAsOpaque = Unmanaged<CFSocketServerTransport>.passUnretained(self).toOpaque()
@@ -133,9 +140,6 @@ public class CFSocketServerTransport : ServerTransport
 
         let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, serverSocketV6, 0)
         CFRunLoopAddSource(CFRunLoopGetCurrent(), socketSource, kCFRunLoopDefaultMode)
-    }
-
-    func stop() {
     }
 }
 

@@ -53,6 +53,14 @@ public class CFSocketClientTransport : ClientTransport {
         // set its read/write/close events on the runloop
     }
     
+    /**
+     * Called to initiate consuming of the write buffers to send data down the connection.
+     */
+    public func setWriteable() {
+        let writeEvents = CFStreamEventType.CanAcceptBytes.rawValue | CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
+        self.registerWriteEvents(writeEvents)
+    }
+
     private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
     {
         let selfAsOpaque = Unmanaged<CFSocketClientTransport>.passUnretained(self).toOpaque()
@@ -62,14 +70,6 @@ public class CFSocketClientTransport : ClientTransport {
 
     func start(delegate : Connection) {
         connection = delegate
-    }
-    
-    /**
-     * Called to initiate consuming of the write buffers to send data down the connection.
-     */
-    func setWriteable() {
-        let writeEvents = CFStreamEventType.CanAcceptBytes.rawValue | CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
-        self.registerWriteEvents(writeEvents)
     }
     
     private func clearWriteable() {

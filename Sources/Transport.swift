@@ -2,11 +2,11 @@
 /**
  * The connection object that is the interface to the underlying transport.
  */
-protocol ClientTransport {
+public protocol ClientTransport {
     func setWriteable()
 }
 
-protocol Connection {
+public protocol Connection {
     /**
      * The underlying connection object this is listening to.
      */
@@ -36,7 +36,7 @@ protocol Connection {
     func dataReceived(buffer: UnsafePointer<UInt8>, length: Int)
 }
 
-protocol ConnectionFactory {
+public protocol ConnectionFactory {
     /**
      * Called when a new connection has been created and appropriate data needs
      * needs to be initialised for this.
@@ -44,7 +44,7 @@ protocol ConnectionFactory {
     func connectionAccepted() -> Connection
 }
 
-protocol ServerTransport {
+public protocol ServerTransport {
     var connectionFactory : ConnectionFactory? { get set }
     func start()
     func stop()
