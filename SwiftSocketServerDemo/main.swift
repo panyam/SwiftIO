@@ -30,7 +30,8 @@ class EchoConnection : Connection
      */
     func writeDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?
     {
-        return nil
+        print("Write data requested...");
+        return (buffer, length)
     }
     
     /**
@@ -38,6 +39,7 @@ class EchoConnection : Connection
      */
     func dataWritten(numWritten: Int)
     {
+        length -= numWritten
     }
     
     /**
@@ -47,6 +49,10 @@ class EchoConnection : Connection
      */
     func dataReceived(buffer: UnsafePointer<UInt8>, length: Int)
     {
+        self.buffer = UnsafeMutablePointer<UInt8>.alloc(length)
+        self.buffer.initializeFrom(UnsafeMutablePointer<UInt8>(buffer), count: length)
+        self.length = length
+        self.transport?.setWriteable()
     }
 }
 
