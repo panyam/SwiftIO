@@ -49,7 +49,7 @@ public class CFSocketServerTransport : ServerTransport
     public var connectionFactory : ConnectionFactory?
     private var transportRunLoop : CFRunLoop
     
-    public init(var runLoop : CFRunLoop?)
+    public init(var _ runLoop : CFRunLoop?)
     {
         if runLoop == nil
         {
