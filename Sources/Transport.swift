@@ -4,6 +4,7 @@
  */
 public protocol ClientTransport {
     func setWriteable()
+    func close()
 }
 
 public protocol Connection {

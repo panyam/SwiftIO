@@ -14,6 +14,7 @@ public class CFSocketClientTransport : ClientTransport {
     var connection : Connection?
     var clientSocketNative : CFSocketNativeHandle
 //    var clientSocket : CFSocket?
+    var readBufferSize = DEFAULT_BUFFER_SIZE
     var readStream : CFReadStream?
     var writeStream : CFWriteStream?
     var transportRunLoop : CFRunLoop?
@@ -24,6 +25,14 @@ public class CFSocketClientTransport : ClientTransport {
         transportRunLoop = runLoop
         initStreams();
         setWriteable()
+    }
+
+    /**
+     * Called to close the transport.
+     */
+    public func close() {
+        CFReadStreamUnscheduleFromRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes);
+        CFWriteStreamUnscheduleFromRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes);
     }
     
     /**
@@ -43,6 +52,10 @@ public class CFSocketClientTransport : ClientTransport {
         }
     }
     
+    /**
+     * Indicates to the transport that no writes are required as yet and to not invoke the write callback
+     * until explicitly required again.
+     */
     private func clearWriteable() {
         let writeEvents = CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
         self.registerWriteEvents(writeEvents)
@@ -95,18 +108,6 @@ public class CFSocketClientTransport : ClientTransport {
         connection = delegate
     }
     
-    private func registerWriteEvents(events: CFOptionFlags) {
-        if writeStream != nil {
-            var streamClientContext = CFStreamClientContext(version:0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
-            withUnsafePointer(&streamClientContext) {
-                if (CFWriteStreamSetClient(writeStream, events, writeCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
-                {
-                    CFWriteStreamScheduleWithRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes);
-                }
-            }
-        }
-    }
-    
     var readBuffer = UnsafeMutablePointer<UInt8>.alloc(DEFAULT_BUFFER_SIZE)
     
     func connectionClosed() {
@@ -138,10 +139,15 @@ public class CFSocketClientTransport : ClientTransport {
                     // only partial data written so dont clear writeable.
                     // if this is the case then for an edge triggered API
                     // we have to ensure that canAcceptBytes will eventually 
-                    // get called - this can happen by either connection calling
-                    // setWriteable - this is not good as they can greedily keep 
-                    // calling it OR we have to dispatch a canAcceptBytes in another 
-                    // cycle of the runloop.
+                    // get called.  So kick it off later on.
+                    // TODO: ensure that we have some kind of backoff so that 
+                    // these async triggers dont flood the run loop if the write
+                    // stream is backed
+                    if writesAreEdgeTriggered {
+                        CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) {
+                            self.canAcceptBytes()
+                        }
+                    }
                     return
                 }
             }
@@ -154,16 +160,33 @@ public class CFSocketClientTransport : ClientTransport {
     func handleReadError() {
         let error = CFReadStreamGetError(readStream);
         print("Read error: \(error)")
-        CFReadStreamUnscheduleFromRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes);
+        // TODO: call connection's close handler
+        close()
     }
     
     func handleWriteError() {
         let error = CFWriteStreamGetError(writeStream);
         print("Write error: \(error)")
-        CFWriteStreamUnscheduleFromRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes);
+        // TODO: call connection's close handler
+        close()
+    }
+    
+    private func registerWriteEvents(events: CFOptionFlags) {
+        if writeStream != nil {
+            var streamClientContext = CFStreamClientContext(version:0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
+            withUnsafePointer(&streamClientContext) {
+                if (CFWriteStreamSetClient(writeStream, events, writeCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
+                {
+                    CFWriteStreamScheduleWithRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes);
+                }
+            }
+        }
     }
 }
 
+/**
+ * Callback for the read stream when data is available or errored.
+ */
 func readCallback(readStream: CFReadStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
 {
     let socketConnection = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
@@ -176,6 +199,9 @@ func readCallback(readStream: CFReadStream!, eventType: CFStreamEventType, info:
     }
 }
 
+/**
+ * Callback for the write stream when data is available or errored.
+ */
 func writeCallback(writeStream: CFWriteStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
 {
     let socketConnection = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
@@ -187,40 +213,3 @@ func writeCallback(writeStream: CFWriteStream!, eventType: CFStreamEventType, in
         socketConnection.handleWriteError()
     }
 }
-
-//
-//
-//private func clientSocketCallback(socket: CFSocket!,
-//    callbackType: CFSocketCallBackType,
-//    address: CFData!,
-//    data: UnsafePointer<Void>,
-//    info: UnsafeMutablePointer<Void>)
-//{
-//    if callbackType == CFSocketCallBackType.ReadCallBack
-//    {
-//        print("Read callback")
-////        let clientTransport = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
-////        clientTransport.hasBytesAvailable()
-//    } else if callbackType == CFSocketCallBackType.WriteCallBack
-//    {
-//        print("Write callback")
-//        let clientTransport = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
-//        clientTransport.canAcceptBytes()
-//    }
-//    //    if (callbackType == CFSocketCallBackType.ReadCallBack)
-//    //    {
-//    //        let socketTransport = Unmanaged<CFSocketServerTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
-//    //        let clientSocket = UnsafePointer<CFSocketNativeHandle>(data)
-//    //        let clientSocketNativeHandle = clientSocket[0]
-//    //        let socketConnection = CFSocketClientTransport(clientSocketNativeHandle)
-//    //        var connection = socketTransport.connectionFactory?.connectionAccepted()
-//    //        if connection != nil
-//    //        {
-//    //            connection?.transport = socketConnection
-//    //            socketConnection.start(connection!)
-//    //        } else {
-//    //            // TODO: close the socket since no connection delegate was found
-//    //        }
-//    //        NSLog("Got connection event: \(callbackType), \(socketTransport), \(clientSocket)");
-//    //    } else if (callback
-//}
