@@ -11,11 +11,7 @@ Pod::Spec.new do |s|
   s.version          = "0.0.1"
   s.summary          = "A simple wrapper around servers built on sockets to hide all the messy details."
 
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!  
+  # This description is used to generate tags and improve search results.
   s.description      = <<-DESC
                         A painful part of developing servers is decoupling underlying transport from the stream handling.  
                         This gets worse with asynchronous IO where socket streams need to be bound to some event loop.
@@ -24,12 +20,12 @@ Pod::Spec.new do |s|
                        DESC
 
   s.homepage         = "https://github.com/panyam/SwiftSocketServer"
-  # s.screenshots     = "www.example.com/screenshots_1", "www.example.com/screenshots_2"
   s.license          = 'MIT'
   s.author           = { "Sriram Panyam" => "sri.panyam@gmail.com" }
   s.source           = { :git => "https://github.com/panyam/SwiftSocketServer.git", :tag => s.version.to_s }
 
-  # s.ios.platform     = :ios, '8.0'
+  s.platform     = :ios, '8.0'
+  # s.platform     = :osx, '10.9'
   # s.osx.platform     = :osx, '10.0'
   s.requires_arc = true
 
@@ -38,7 +34,7 @@ Pod::Spec.new do |s|
     'SwiftSocketServer' => ['Pod/Assets/*.png']
   }
 
-  s.public_header_files = 'SwiftSocketServer/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
+  s.public_header_files = 'Sources/*.h'
+ # s.frameworks = 'CoreFoundation'
   # s.dependency 'AFNetworking', '~> 2.3'
 end
