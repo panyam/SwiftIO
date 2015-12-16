@@ -62,7 +62,7 @@ class EchoFactory : ConnectionFactory {
     }
 }
 
-var server = CFSocketServerTransport()
+var server = CFSocketServerTransport(runLoop: nil)
 server.connectionFactory = EchoFactory()
 server.start()
 

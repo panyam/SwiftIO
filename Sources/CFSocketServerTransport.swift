@@ -31,16 +31,7 @@ private func handleConnectionAccept(socket: CFSocket!,
         let socketTransport = Unmanaged<CFSocketServerTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
         let clientSocket = UnsafePointer<CFSocketNativeHandle>(data)
         let clientSocketNativeHandle = clientSocket[0]
-        let socketConnection = CFSocketClientTransport(clientSocketNativeHandle)
-        var connection = socketTransport.connectionFactory?.connectionAccepted()
-        if connection != nil
-        {
-            connection?.transport = socketConnection
-            socketConnection.start(connection!)
-        } else {
-            // TODO: close the socket since no connection delegate was found
-        }
-        NSLog("Got connection event: \(callbackType), \(socketTransport), \(clientSocket)");
+        socketTransport.handleConnection(clientSocketNativeHandle);
     }
 }
 
@@ -56,9 +47,15 @@ public class CFSocketServerTransport : ServerTransport
     private var serverSocket : CFSocket?
     private var serverSocketV6 : CFSocket?
     public var connectionFactory : ConnectionFactory?
+    private var transportRunLoop : CFRunLoop
     
-    public init()
+    public init(var runLoop : CFRunLoop?)
     {
+        if runLoop == nil
+        {
+            runLoop = CFRunLoopGetCurrent();
+        }
+        transportRunLoop = runLoop!
     }
     
     public func start()
@@ -74,6 +71,19 @@ public class CFSocketServerTransport : ServerTransport
     }
     
     public func stop() {
+    }
+
+    func handleConnection(clientSocketNativeHandle : CFSocketNativeHandle)
+    {
+        var connection = connectionFactory?.connectionAccepted()
+        if connection != nil
+        {
+            let socketConnection = CFSocketClientTransport(clientSocketNativeHandle, runLoop: transportRunLoop)
+            connection?.transport = socketConnection
+            socketConnection.start(connection!)
+        } else {
+            // TODO: close the socket since no connection delegate was found
+        }
     }
 
     private func initSocket()
@@ -105,7 +115,7 @@ public class CFSocketServerTransport : ServerTransport
         }
 
         let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, serverSocket, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), socketSource, kCFRunLoopDefaultMode)
+        CFRunLoopAddSource(transportRunLoop, socketSource, kCFRunLoopDefaultMode)
     }
 
     private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
@@ -139,7 +149,7 @@ public class CFSocketServerTransport : ServerTransport
         }
 
         let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, serverSocketV6, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), socketSource, kCFRunLoopDefaultMode)
+        CFRunLoopAddSource(transportRunLoop, socketSource, kCFRunLoopDefaultMode)
     }
 }
 
