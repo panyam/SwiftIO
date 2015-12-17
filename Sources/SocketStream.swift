@@ -54,6 +54,10 @@ public class SocketStream : Connection {
     private var readRequests = [IORequest]()
     private var writeRequests = [IORequest]()
 
+    public init()
+    {
+    }
+
     public func read(buffer: BufferType, length: Int, callback: IOCallback)
     {
         transport?.performBlock({ () -> Void in

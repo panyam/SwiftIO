@@ -145,10 +145,6 @@ public class CFSocketClientTransport : ClientTransport {
         let selfAsVoidPtr = UnsafeMutablePointer<Void>(selfAsOpaque)
         return selfAsVoidPtr
     }
-
-    func start(delegate : Connection) {
-        connection = delegate
-    }
     
     func connectionClosed() {
         connection?.connectionClosed()
