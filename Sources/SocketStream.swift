@@ -29,8 +29,8 @@ public class SocketStream : Connection {
         var buffer: BufferType
         var length: Int
         var satisfied = 0
-        var callback: IOCallback
-        init(buffer: BufferType, length: Int, callback: IOCallback)
+        var callback: IOCallback?
+        init(buffer: BufferType, length: Int, callback: IOCallback?)
         {
             self.buffer = buffer
             self.length = length
@@ -43,7 +43,9 @@ public class SocketStream : Connection {
         }
         
         func invokeCallback(err: ErrorType?) {
-            callback(buffer: buffer, length: length, error: err)
+            if callback != nil {
+                callback!(buffer: buffer, length: satisfied, error: err)
+            }
         }
     }
     
@@ -66,7 +68,7 @@ public class SocketStream : Connection {
         })
     }
     
-    public func write(buffer: BufferType, length: Int, callback: IOCallback)
+    public func write(buffer: BufferType, length: Int, callback: IOCallback?)
     {
         transport?.performBlock({ () -> Void in
             self.writeRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
@@ -140,11 +142,11 @@ public class SocketStream : Connection {
         assert(!readRequests.isEmpty, "Write request queue cannot be empty when we have a data callback")
         if let request = readRequests.first {
             request.satisfied += length
-            if request.remaining() == 0 {
+//            if request.remaining() == 0 {
                 // done so pop it off
                 readRequests.removeFirst()
                 request.invokeCallback(nil)
-            }
+//            }
         }
     }
 }

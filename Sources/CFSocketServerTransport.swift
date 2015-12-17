@@ -75,11 +75,12 @@ public class CFSocketServerTransport : ServerTransport
 
     func handleConnection(clientSocketNativeHandle : CFSocketNativeHandle)
     {
-        if var connection = connectionFactory?.connectionAccepted()
+        if var connection = connectionFactory?.createNewConnection()
         {
             let clientTransport = CFSocketClientTransport(clientSocketNativeHandle, runLoop: transportRunLoop)
             connection.transport = clientTransport
             clientTransport.connection = connection
+            connectionFactory?.connectionStarted(connection);
         } else {
             // TODO: close the socket since no connection delegate was found
         }

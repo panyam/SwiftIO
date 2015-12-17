@@ -11,6 +11,12 @@
 		F73A8C921C22863F00352333 /* ErrorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C911C22863F00352333 /* ErrorTypes.swift */; };
 		F73A8C931C2286E700352333 /* SocketStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C8F1C22726F00352333 /* SocketStream.swift */; };
 		F73A8C941C2286E700352333 /* ErrorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C911C22863F00352333 /* ErrorTypes.swift */; };
+		F73A8C9C1C229CC900352333 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C9B1C229CC900352333 /* main.swift */; };
+		F73A8CA01C229E1000352333 /* CFSocketClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64601C20958D00493204 /* CFSocketClientTransport.swift */; };
+		F73A8CA11C229E1000352333 /* CFSocketServerTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */; };
+		F73A8CA21C229E1000352333 /* Transport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64621C20958D00493204 /* Transport.swift */; };
+		F73A8CA31C229E1000352333 /* SocketStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C8F1C22726F00352333 /* SocketStream.swift */; };
+		F73A8CA41C229E1000352333 /* ErrorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C911C22863F00352333 /* ErrorTypes.swift */; };
 		F7CF64451C2094B900493204 /* SwiftSocketServer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */; };
 		F7CF644A1C2094B900493204 /* SwiftSocketServerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64491C2094B900493204 /* SwiftSocketServerTests.swift */; };
 		F7CF645B1C2094F600493204 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF645A1C2094F600493204 /* main.swift */; };
@@ -25,6 +31,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		F73A8CA51C229E1D00352333 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F7CF64311C2094B900493204 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F7CF64391C2094B900493204;
+			remoteInfo = SwiftSocketServer;
+		};
 		F7CF64461C2094B900493204 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F7CF64311C2094B900493204 /* Project object */;
@@ -42,6 +55,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		F73A8C971C229CC900352333 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		F7CF64561C2094F600493204 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -56,6 +78,8 @@
 /* Begin PBXFileReference section */
 		F73A8C8F1C22726F00352333 /* SocketStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketStream.swift; sourceTree = "<group>"; };
 		F73A8C911C22863F00352333 /* ErrorTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorTypes.swift; sourceTree = "<group>"; };
+		F73A8C991C229CC900352333 /* SwiftSocketServerCallbackDemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftSocketServerCallbackDemo; sourceTree = BUILT_PRODUCTS_DIR; };
+		F73A8C9B1C229CC900352333 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftSocketServer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7CF643F1C2094B900493204 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F7CF64441C2094B900493204 /* SwiftSocketServerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftSocketServerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -71,6 +95,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		F73A8C961C229CC900352333 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F7CF64361C2094B900493204 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -97,6 +128,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F73A8C9A1C229CC900352333 /* SwiftSocketServerCallbackDemo */ = {
+			isa = PBXGroup;
+			children = (
+				F73A8C9B1C229CC900352333 /* main.swift */,
+			);
+			path = SwiftSocketServerCallbackDemo;
+			sourceTree = "<group>";
+		};
 		F7CF64301C2094B900493204 = {
 			isa = PBXGroup;
 			children = (
@@ -104,6 +143,7 @@
 				F7CF643C1C2094B900493204 /* SwiftSocketServer */,
 				F7CF64481C2094B900493204 /* SwiftSocketServerTests */,
 				F7CF64591C2094F600493204 /* SwiftSocketServerDemo */,
+				F73A8C9A1C229CC900352333 /* SwiftSocketServerCallbackDemo */,
 				F7CF643B1C2094B900493204 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -114,6 +154,7 @@
 				F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */,
 				F7CF64441C2094B900493204 /* SwiftSocketServerTests.xctest */,
 				F7CF64581C2094F600493204 /* SwiftSocketServerDemo */,
+				F73A8C991C229CC900352333 /* SwiftSocketServerCallbackDemo */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -172,6 +213,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		F73A8C981C229CC900352333 /* SwiftSocketServerCallbackDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F73A8C9F1C229CC900352333 /* Build configuration list for PBXNativeTarget "SwiftSocketServerCallbackDemo" */;
+			buildPhases = (
+				F73A8C951C229CC900352333 /* Sources */,
+				F73A8C961C229CC900352333 /* Frameworks */,
+				F73A8C971C229CC900352333 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F73A8CA61C229E1D00352333 /* PBXTargetDependency */,
+			);
+			name = SwiftSocketServerCallbackDemo;
+			productName = SwiftSocketServerCallbackDemo;
+			productReference = F73A8C991C229CC900352333 /* SwiftSocketServerCallbackDemo */;
+			productType = "com.apple.product-type.tool";
+		};
 		F7CF64391C2094B900493204 /* SwiftSocketServer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F7CF644E1C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServer" */;
@@ -236,6 +295,9 @@
 				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Sriram Panyam";
 				TargetAttributes = {
+					F73A8C981C229CC900352333 = {
+						CreatedOnToolsVersion = 7.1.1;
+					};
 					F7CF64391C2094B900493204 = {
 						CreatedOnToolsVersion = 7.1.1;
 					};
@@ -262,6 +324,7 @@
 				F7CF64391C2094B900493204 /* SwiftSocketServer */,
 				F7CF64431C2094B900493204 /* SwiftSocketServerTests */,
 				F7CF64571C2094F600493204 /* SwiftSocketServerDemo */,
+				F73A8C981C229CC900352333 /* SwiftSocketServerCallbackDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -284,6 +347,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		F73A8C951C229CC900352333 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F73A8CA01C229E1000352333 /* CFSocketClientTransport.swift in Sources */,
+				F73A8CA11C229E1000352333 /* CFSocketServerTransport.swift in Sources */,
+				F73A8CA21C229E1000352333 /* Transport.swift in Sources */,
+				F73A8CA31C229E1000352333 /* SocketStream.swift in Sources */,
+				F73A8CA41C229E1000352333 /* ErrorTypes.swift in Sources */,
+				F73A8C9C1C229CC900352333 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F7CF64351C2094B900493204 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -320,6 +396,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		F73A8CA61C229E1D00352333 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F7CF64391C2094B900493204 /* SwiftSocketServer */;
+			targetProxy = F73A8CA51C229E1D00352333 /* PBXContainerItemProxy */;
+		};
 		F7CF64471C2094B900493204 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = F7CF64391C2094B900493204 /* SwiftSocketServer */;
@@ -333,6 +414,20 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		F73A8C9D1C229CC900352333 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		F73A8C9E1C229CC900352333 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		F7CF644C1C2094B900493204 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -494,6 +589,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		F73A8C9F1C229CC900352333 /* Build configuration list for PBXNativeTarget "SwiftSocketServerCallbackDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F73A8C9D1C229CC900352333 /* Debug */,
+				F73A8C9E1C229CC900352333 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		F7CF64341C2094B900493204 /* Build configuration list for PBXProject "SwiftSocketServer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

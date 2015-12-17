@@ -63,7 +63,8 @@ public protocol ConnectionFactory {
      * Called when a new connection has been created and appropriate data needs
      * needs to be initialised for this.
      */
-    func connectionAccepted() -> Connection
+    func createNewConnection() -> Connection
+    func connectionStarted(connection : Connection)
 }
 
 public protocol ServerTransport {

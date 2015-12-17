@@ -74,8 +74,11 @@ class EchoConnection : Connection
 }
 
 class EchoFactory : ConnectionFactory {
-    func connectionAccepted() -> Connection {
+    func createNewConnection() -> Connection {
         return EchoConnection()
+    }
+    func connectionStarted(connection : Connection)
+    {
     }
 }
 
