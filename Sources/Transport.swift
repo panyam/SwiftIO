@@ -1,10 +1,15 @@
 
+
+import CoreFoundation
+
 /**
  * The connection object that is the interface to the underlying transport.
  */
 public protocol ClientTransport {
-    func setWriteable()
+    func setReadyToWrite()
+    func setReadyToRead()
     func close()
+    func performBlock(block: (() -> Void))
 }
 
 public protocol Connection {
@@ -19,6 +24,16 @@ public protocol Connection {
     func connectionClosed()
     
     /**
+     * Called when read error received.
+     */
+    func receivedReadError(error: SocketErrorType)
+    
+    /**
+     * Called when write error received.
+     */
+    func receivedWriteError(error: SocketErrorType)
+    
+    /**
      * Called by the transport when it is ready to send data.
      * Returns the number of bytes of data available.
      */
@@ -30,11 +45,17 @@ public protocol Connection {
     func dataWritten(numWritten: Int)
     
     /**
+     * Called by the transport when it can pass data to be processed.
+     * Returns a buffer (and length) into which at most length number bytes will be filled.
+     */
+    func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?
+    
+    /**
      * Called to process data that has been received.
      * It is upto the caller of this interface to consume *all* the data
      * provided.
      */
-    func dataReceived(buffer: UnsafePointer<UInt8>, length: Int)
+    func dataReceived(length: Int)
 }
 
 public protocol ConnectionFactory {
@@ -47,6 +68,6 @@ public protocol ConnectionFactory {
 
 public protocol ServerTransport {
     var connectionFactory : ConnectionFactory? { get set }
-    func start()
+    func start() -> SocketErrorType?
     func stop()
 }

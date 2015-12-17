@@ -58,16 +58,16 @@ public class CFSocketServerTransport : ServerTransport
         transportRunLoop = runLoop!
     }
     
-    public func start()
+    public func start() -> SocketErrorType?
     {
         if isRunning {
             NSLog("Server is already running")
-            return
+            return nil
         }
         
         NSLog("Registered server")
         isRunning = true
-        initSocket()
+        return initSocket()
     }
     
     public func stop() {
@@ -86,7 +86,7 @@ public class CFSocketServerTransport : ServerTransport
         }
     }
 
-    private func initSocket()
+    private func initSocket() -> SocketErrorType?
     {
         let selfAsOpaque = Unmanaged<CFSocketServerTransport>.passUnretained(self).toOpaque()
         let selfAsVoidPtr = UnsafeMutablePointer<Void>(selfAsOpaque)
@@ -102,6 +102,7 @@ public class CFSocketServerTransport : ServerTransport
         sin.sin_addr.s_addr = 0
         let sin_len = sizeof(sockaddr_in)
         
+        var error : SocketErrorType? = nil
         withUnsafePointer(&sin) { //(<#UnsafePointer<T>#>) -> Result in
             let sincfd = CFDataCreate(
                 kCFAllocatorDefault,
@@ -109,13 +110,17 @@ public class CFSocketServerTransport : ServerTransport
                 sin_len);
             let err = CFSocketSetAddress(serverSocket, sincfd);
             if err != CFSocketError.Success {
+                error = SocketErrorType(message: "Unable to set address on socket")
                 let errstr : String? =  String.fromCString(strerror(errno));
                 NSLog ("Socket Set Address Error: \(err.rawValue), \(errno), \(errstr)")
             }
         }
 
-        let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, serverSocket, 0)
-        CFRunLoopAddSource(transportRunLoop, socketSource, kCFRunLoopDefaultMode)
+        if error == nil {
+            let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, serverSocket, 0)
+            CFRunLoopAddSource(transportRunLoop, socketSource, kCFRunLoopDefaultMode)
+        }
+        return error
     }
 
     private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
@@ -125,7 +130,7 @@ public class CFSocketServerTransport : ServerTransport
         return selfAsVoidPtr
     }
     
-    private func initSocketV6()
+    private func initSocketV6() -> SocketErrorType?
     {
         var socketContext = CFSocketContext(version: 0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
         withUnsafePointer(&socketContext) {
@@ -140,16 +145,26 @@ public class CFSocketServerTransport : ServerTransport
         sin6.sin6_addr = in6addr_any;
         let sin6_len = sizeof(sockaddr_in)
         
+        var error : SocketErrorType? = nil
         withUnsafePointer(&sin6) { //(<#UnsafePointer<T>#>) -> Result in
             let sincfd = CFDataCreate(
                 kCFAllocatorDefault,
                 UnsafePointer($0),
                 sin6_len);
-            CFSocketSetAddress(serverSocketV6, sincfd);
+            
+            let err = CFSocketSetAddress(serverSocketV6, sincfd)
+            if err != CFSocketError.Success {
+                let errstr : String? =  String.fromCString(strerror(errno));
+                error = SocketErrorType(message: "Unable to set V6 address on socket")
+                NSLog ("Socket Set Address Error: \(err.rawValue), \(errno), \(errstr)")
+            }
         }
 
-        let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, serverSocketV6, 0)
-        CFRunLoopAddSource(transportRunLoop, socketSource, kCFRunLoopDefaultMode)
+        if error == nil {
+            let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, serverSocketV6, 0)
+            CFRunLoopAddSource(transportRunLoop, socketSource, kCFRunLoopDefaultMode)
+        }
+        return error
     }
 }
 
