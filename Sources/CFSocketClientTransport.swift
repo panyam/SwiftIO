@@ -123,6 +123,7 @@ public class CFSocketClientTransport : ClientTransport {
             withUnsafePointer(&streamClientContext) {
                 if (CFReadStreamSetClient(readStream, readEvents, readCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
                 {
+                    CFReadStreamUnscheduleFromRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes)
                     CFReadStreamScheduleWithRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes);
                 }
             }
@@ -219,6 +220,7 @@ public class CFSocketClientTransport : ClientTransport {
             withUnsafePointer(&streamClientContext) {
                 if (CFWriteStreamSetClient(writeStream, events, writeCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
                 {
+                    CFWriteStreamUnscheduleFromRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes)
                     CFWriteStreamScheduleWithRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes);
                 }
             }
@@ -231,6 +233,7 @@ public class CFSocketClientTransport : ClientTransport {
             withUnsafePointer(&streamClientContext) {
                 if (CFReadStreamSetClient(readStream, events, readCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
                 {
+                    CFReadStreamUnscheduleFromRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes)
                     CFReadStreamScheduleWithRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes);
                 }
             }
