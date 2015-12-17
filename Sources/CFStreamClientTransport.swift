@@ -13,11 +13,11 @@ import Foundation
 public class CFSocketClientTransport : ClientTransport {
     var connection : Connection?
     var clientSocketNative : CFSocketNativeHandle
-    var clientSocket : CFSocket?
+    var readStream : CFReadStream?
+    var writeStream : CFWriteStream?
     var transportRunLoop : CFRunLoop
     var readsAreEdgeTriggered = true
     var writesAreEdgeTriggered = true
-    var runLoopSource : CFRunLoopSource?
     
     init(_ clientSock : CFSocketNativeHandle, runLoop: CFRunLoop?) {
         clientSocketNative = clientSock;
@@ -26,10 +26,7 @@ public class CFSocketClientTransport : ClientTransport {
         } else {
             transportRunLoop = runLoop!
         }
-
-        initSockets();
-        
-        enableSocketFlag(kCFSocketCloseOnInvalidate)
+        initStreams();
         setReadyToWrite()
         setReadyToRead()
     }
@@ -51,21 +48,42 @@ public class CFSocketClientTransport : ClientTransport {
      * Called to close the transport.
      */
     public func close() {
-        CFRunLoopRemoveSource(transportRunLoop, runLoopSource, kCFRunLoopCommonModes)
+        CFReadStreamUnscheduleFromRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes);
+        CFWriteStreamUnscheduleFromRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes);
     }
     
     /**
      * Called to indicate that the connection is ready to write data
      */
     public func setReadyToWrite() {
-        enableSocketFlag(kCFSocketAutomaticallyReenableWriteCallBack)
+        let writeEvents = CFStreamEventType.CanAcceptBytes.rawValue | CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
+        self.registerWriteEvents(writeEvents)
+        
+        // Should this be called here?
+        // It is possible that a client can call this as many as 
+        // time as it needs greedily
+        if writesAreEdgeTriggered {
+            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) { () -> Void in
+                self.canAcceptBytes()
+            }
+        }
     }
     
     /**
      * Called to indicate that the connection is ready to read data
      */
     public func setReadyToRead() {
-        enableSocketFlag(kCFSocketAutomaticallyReenableReadCallBack)
+        let readEvents = CFStreamEventType.HasBytesAvailable.rawValue | CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
+        self.registerReadEvents(readEvents)
+        
+        // Should this be called here?
+        // It is possible that a client can call this as many as
+        // time as it needs greedily
+        if readsAreEdgeTriggered {
+            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) { () -> Void in
+                self.hasBytesAvailable()
+            }
+        }
     }
     
     /**
@@ -73,7 +91,8 @@ public class CFSocketClientTransport : ClientTransport {
      * until explicitly required again.
      */
     private func clearReadyToWrite() {
-        disableSocketFlag(kCFSocketAutomaticallyReenableWriteCallBack)
+        let writeEvents = CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
+        self.registerWriteEvents(writeEvents)
     }
     
     /**
@@ -81,21 +100,45 @@ public class CFSocketClientTransport : ClientTransport {
      * until explicitly required again.
      */
     private func clearReadbale() {
-        disableSocketFlag(kCFSocketAutomaticallyReenableReadCallBack)
+        let readEvents = CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
+        self.registerReadEvents(readEvents)
     }
     
-    private func initSockets()
+    private func initStreams()
     {
-        var socketContext = CFSocketContext(version: 0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
-        withUnsafePointer(&socketContext) {
-            clientSocket = CFSocketCreateWithNative(kCFAllocatorDefault,
-                clientSocketNative,
-                CFSocketCallBackType.ReadCallBack.rawValue | CFSocketCallBackType.WriteCallBack.rawValue,
-                clientSocketCallback,
-                UnsafePointer<CFSocketContext>($0))
+        withUnsafeMutablePointer(&readStream) {
+            let readStreamPtr = UnsafeMutablePointer<Unmanaged<CFReadStream>?>($0)
+            withUnsafeMutablePointer(&writeStream, {
+                let writeStreamPtr = UnsafeMutablePointer<Unmanaged<CFWriteStream>?>($0)
+                CFStreamCreatePairWithSocket(kCFAllocatorDefault, clientSocketNative, readStreamPtr, writeStreamPtr)
+            })
         }
-        runLoopSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, clientSocket, 0)
-        CFRunLoopAddSource(transportRunLoop, runLoopSource, kCFRunLoopDefaultMode)
+        
+        if readStream != nil && writeStream != nil {
+            CFReadStreamSetProperty(readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+            CFWriteStreamSetProperty(writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+            
+            // register with run loop
+            var streamClientContext = CFStreamClientContext(version:0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
+            let readEvents = CFStreamEventType.HasBytesAvailable.rawValue | CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
+            withUnsafePointer(&streamClientContext) {
+                if (CFReadStreamSetClient(readStream, readEvents, readCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
+                {
+                    CFReadStreamUnscheduleFromRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes)
+                    CFReadStreamScheduleWithRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes);
+                }
+            }
+            
+            if CFReadStreamOpen(readStream) && CFWriteStreamOpen(writeStream) {
+                //use the streams
+                print("Streams initialized")
+            }
+            else {
+                print("Could not initialize streams!");
+            }
+        }
+        
+        // set its read/write/close events on the runloop
     }
 
     private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
@@ -128,8 +171,7 @@ public class CFSocketClientTransport : ClientTransport {
     func canAcceptBytes() {
         if let (buffer, length) = connection?.writeDataRequested() {
             if length > 0 {
-                let data = CFDataCreate(kCFAllocatorDefault, buffer, length);
-                let numWritten = CFSocketSendData(clientSocket, nil, data, 3600)
+                let numWritten = CFWriteStreamWrite(writeStream, buffer, length)
                 if numWritten > 0 {
                     connection?.dataWritten(numWritten)
                 } else if numWritten < 0 {
@@ -160,29 +202,43 @@ public class CFSocketClientTransport : ClientTransport {
     }
     
     func handleReadError() {
-//        let error = CFReadStreamGetError(readStream);
-//        print("Read error: \(error)")
-//        connection?.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: Int(error.error), message: ""))
+        let error = CFReadStreamGetError(readStream);
+        print("Read error: \(error)")
+        connection?.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: Int(error.error), message: ""))
         close()
     }
     
     func handleWriteError() {
-//        let error = CFWriteStreamGetError(writeStream);
-//        print("Write error: \(error)")
-//        connection?.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: Int(error.error), message: ""))
+        let error = CFWriteStreamGetError(writeStream);
+        print("Write error: \(error)")
+        connection?.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: Int(error.error), message: ""))
         close()
     }
     
-    func enableSocketFlag(flag: UInt) {
-        var flags = CFSocketGetSocketFlags(clientSocket)
-        flags |= flag
-        CFSocketSetSocketFlags(clientSocket, flags)
+    private func registerWriteEvents(events: CFOptionFlags) {
+        if writeStream != nil {
+            var streamClientContext = CFStreamClientContext(version:0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
+            withUnsafePointer(&streamClientContext) {
+                if (CFWriteStreamSetClient(writeStream, events, writeCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
+                {
+                    CFWriteStreamUnscheduleFromRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes)
+                    CFWriteStreamScheduleWithRunLoop(writeStream, transportRunLoop, kCFRunLoopCommonModes);
+                }
+            }
+        }
     }
-
-    func disableSocketFlag(flag: UInt) {
-        var flags = CFSocketGetSocketFlags(clientSocket)
-        flags &= ~flag
-        CFSocketSetSocketFlags(clientSocket, flags)
+    
+    private func registerReadEvents(events: CFOptionFlags) {
+        if readStream != nil {
+            var streamClientContext = CFStreamClientContext(version:0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
+            withUnsafePointer(&streamClientContext) {
+                if (CFReadStreamSetClient(readStream, events, readCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
+                {
+                    CFReadStreamUnscheduleFromRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes)
+                    CFReadStreamScheduleWithRunLoop(readStream, transportRunLoop, kCFRunLoopCommonModes);
+                }
+            }
+        }
     }
 }
 
@@ -213,25 +269,5 @@ func writeCallback(writeStream: CFWriteStream!, eventType: CFStreamEventType, in
         socketConnection.connectionClosed()
     } else if eventType == CFStreamEventType.ErrorOccurred {
         socketConnection.handleWriteError()
-    }
-}
-
-
-private func clientSocketCallback(socket: CFSocket!,
-    callbackType: CFSocketCallBackType,
-    address: CFData!,
-    data: UnsafePointer<Void>,
-    info: UnsafeMutablePointer<Void>)
-{
-    if (callbackType == CFSocketCallBackType.ReadCallBack)
-    {
-        let clientTransport = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
-        clientTransport.hasBytesAvailable()
-    }
-    else if (callbackType == CFSocketCallBackType.WriteCallBack)
-    {
-        print("Write callback")
-        let clientTransport = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
-        clientTransport.canAcceptBytes()
     }
 }
