@@ -70,9 +70,9 @@ public class CFSocketServerTransport : ServerTransport
         if let error = initSocket() {
             return error
         }
-        if let error = initSocketV6() {
-            return error
-        }
+//        if let error = initSocketV6() {
+//            return error
+//        }
         return nil
     }
     
@@ -117,8 +117,6 @@ public class CFSocketServerTransport : ServerTransport
             } else {
                 outSocket = CFSocketCreate(kCFAllocatorDefault, PF_INET, 0, 0, 2, handleConnectionAccept, UnsafePointer<CFSocketContext>($0));
             }
-            let flags = CFSocketGetSocketFlags(outSocket)
-            CFSocketSetSocketFlags(outSocket, flags | kCFSocketAutomaticallyReenableAcceptCallBack)
             
             var sincfd : CFData?
             if isV6 {
@@ -157,6 +155,8 @@ public class CFSocketServerTransport : ServerTransport
             }
         }
         if error == nil {
+            let flags = CFSocketGetSocketFlags(outSocket)
+            CFSocketSetSocketFlags(outSocket, flags | kCFSocketAutomaticallyReenableAcceptCallBack)
             let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, outSocket, 0)
             CFRunLoopAddSource(transportRunLoop, socketSource, kCFRunLoopDefaultMode)
         }
