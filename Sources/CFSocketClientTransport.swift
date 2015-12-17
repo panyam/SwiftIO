@@ -8,14 +8,14 @@
 //
 
 import Foundation
-
+import Darwin
 
 public class CFSocketClientTransport : ClientTransport {
     var connection : Connection?
     var clientSocketNative : CFSocketNativeHandle
     var clientSocket : CFSocket?
     var transportRunLoop : CFRunLoop
-    var readsAreEdgeTriggered = true
+    var readsAreEdgeTriggered = false
     var writesAreEdgeTriggered = true
     var runLoopSource : CFRunLoopSource?
     
@@ -59,6 +59,14 @@ public class CFSocketClientTransport : ClientTransport {
      */
     public func setReadyToWrite() {
         enableSocketFlag(kCFSocketAutomaticallyReenableWriteCallBack)
+        // Should this be called here?
+        // It is possible that a client can call this as many as
+        // time as it needs greedily
+        if writesAreEdgeTriggered {
+            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) { () -> Void in
+                self.canAcceptBytes()
+            }
+        }
     }
     
     /**
@@ -66,6 +74,14 @@ public class CFSocketClientTransport : ClientTransport {
      */
     public func setReadyToRead() {
         enableSocketFlag(kCFSocketAutomaticallyReenableReadCallBack)
+        // Should this be called here?
+        // It is possible that a client can call this as many as
+        // time as it needs greedily
+        if readsAreEdgeTriggered {
+            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) { () -> Void in
+                self.hasBytesAvailable()
+            }
+        }
     }
     
     /**
@@ -80,12 +96,13 @@ public class CFSocketClientTransport : ClientTransport {
      * Indicates to the transport that no writes are required as yet and to not invoke the write callback
      * until explicitly required again.
      */
-    private func clearReadbale() {
+    private func clearReadyToRead() {
         disableSocketFlag(kCFSocketAutomaticallyReenableReadCallBack)
     }
     
     private func initSockets()
     {
+        // mark the socket as non blocking first
         var socketContext = CFSocketContext(version: 0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
         withUnsafePointer(&socketContext) {
             clientSocket = CFSocketCreateWithNative(kCFAllocatorDefault,
@@ -113,28 +130,33 @@ public class CFSocketClientTransport : ClientTransport {
         // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
         if let (buffer, length) = connection?.readDataRequested() {
             if length > 0 {
-                let bytesRead = CFReadStreamRead(readStream, buffer, length);
+                let bytesRead = recv(clientSocketNative, buffer, length, 0)
                 if bytesRead > 0 {
                     connection?.dataReceived(bytesRead)
                 } else if bytesRead < 0 {
                     handleReadError()
+                } else {
+                    // peer has closed so should we finish?
+                    clearReadyToRead()
+                    close()
                 }
                 return
             }
         }
-//        clearReadyToRead()
+        clearReadyToRead()
     }
     
     func canAcceptBytes() {
         if let (buffer, length) = connection?.writeDataRequested() {
             if length > 0 {
-                let data = CFDataCreate(kCFAllocatorDefault, buffer, length);
-                let numWritten = CFSocketSendData(clientSocket, nil, data, 3600)
+                let numWritten = send(clientSocketNative, buffer, length, 0)
                 if numWritten > 0 {
                     connection?.dataWritten(numWritten)
                 } else if numWritten < 0 {
                     // error?
                     handleWriteError()
+                } else {
+                    print("0 bytes sent")
                 }
                 
                 if numWritten >= 0 && numWritten < length {
@@ -185,37 +207,6 @@ public class CFSocketClientTransport : ClientTransport {
         CFSocketSetSocketFlags(clientSocket, flags)
     }
 }
-
-/**
- * Callback for the read stream when data is available or errored.
- */
-func readCallback(readStream: CFReadStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
-{
-    let socketConnection = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
-    if eventType == CFStreamEventType.HasBytesAvailable {
-        socketConnection.hasBytesAvailable()
-    } else if eventType == CFStreamEventType.EndEncountered {
-        socketConnection.connectionClosed()
-    } else if eventType == CFStreamEventType.ErrorOccurred {
-        socketConnection.handleReadError()
-    }
-}
-
-/**
- * Callback for the write stream when data is available or errored.
- */
-func writeCallback(writeStream: CFWriteStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
-{
-    let socketConnection = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
-    if eventType == CFStreamEventType.CanAcceptBytes {
-        socketConnection.canAcceptBytes();
-    } else if eventType == CFStreamEventType.EndEncountered {
-        socketConnection.connectionClosed()
-    } else if eventType == CFStreamEventType.ErrorOccurred {
-        socketConnection.handleWriteError()
-    }
-}
-
 
 private func clientSocketCallback(socket: CFSocket!,
     callbackType: CFSocketCallBackType,

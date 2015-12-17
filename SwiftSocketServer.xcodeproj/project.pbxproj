@@ -17,6 +17,9 @@
 		F73A8CA21C229E1000352333 /* Transport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64621C20958D00493204 /* Transport.swift */; };
 		F73A8CA31C229E1000352333 /* SocketStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C8F1C22726F00352333 /* SocketStream.swift */; };
 		F73A8CA41C229E1000352333 /* ErrorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C911C22863F00352333 /* ErrorTypes.swift */; };
+		F73A8CA81C2361A200352333 /* CFStreamClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */; };
+		F73A8CA91C2361A200352333 /* CFStreamClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */; };
+		F73A8CAA1C2361A200352333 /* CFStreamClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */; };
 		F7CF64451C2094B900493204 /* SwiftSocketServer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */; };
 		F7CF644A1C2094B900493204 /* SwiftSocketServerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64491C2094B900493204 /* SwiftSocketServerTests.swift */; };
 		F7CF645B1C2094F600493204 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF645A1C2094F600493204 /* main.swift */; };
@@ -80,6 +83,7 @@
 		F73A8C911C22863F00352333 /* ErrorTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorTypes.swift; sourceTree = "<group>"; };
 		F73A8C991C229CC900352333 /* SwiftSocketServerCallbackDemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftSocketServerCallbackDemo; sourceTree = BUILT_PRODUCTS_DIR; };
 		F73A8C9B1C229CC900352333 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFStreamClientTransport.swift; sourceTree = "<group>"; };
 		F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftSocketServer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7CF643F1C2094B900493204 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F7CF64441C2094B900493204 /* SwiftSocketServerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftSocketServerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -189,6 +193,7 @@
 		F7CF645F1C20958D00493204 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */,
 				F7CF64601C20958D00493204 /* CFSocketClientTransport.swift */,
 				F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */,
 				F7CF64621C20958D00493204 /* Transport.swift */,
@@ -353,6 +358,7 @@
 			files = (
 				F73A8CA01C229E1000352333 /* CFSocketClientTransport.swift in Sources */,
 				F73A8CA11C229E1000352333 /* CFSocketServerTransport.swift in Sources */,
+				F73A8CAA1C2361A200352333 /* CFStreamClientTransport.swift in Sources */,
 				F73A8CA21C229E1000352333 /* Transport.swift in Sources */,
 				F73A8CA31C229E1000352333 /* SocketStream.swift in Sources */,
 				F73A8CA41C229E1000352333 /* ErrorTypes.swift in Sources */,
@@ -365,6 +371,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F7CF64641C20958D00493204 /* CFSocketServerTransport.swift in Sources */,
+				F73A8CA81C2361A200352333 /* CFStreamClientTransport.swift in Sources */,
 				F7CF64651C20958D00493204 /* Transport.swift in Sources */,
 				F73A8C921C22863F00352333 /* ErrorTypes.swift in Sources */,
 				F73A8C901C22726F00352333 /* SocketStream.swift in Sources */,
@@ -386,6 +393,7 @@
 			files = (
 				F73A8C931C2286E700352333 /* SocketStream.swift in Sources */,
 				F73A8C941C2286E700352333 /* ErrorTypes.swift in Sources */,
+				F73A8CA91C2361A200352333 /* CFStreamClientTransport.swift in Sources */,
 				F7CF64661C2095E600493204 /* CFSocketClientTransport.swift in Sources */,
 				F7CF64671C2095E600493204 /* CFSocketServerTransport.swift in Sources */,
 				F7CF64681C2095E600493204 /* Transport.swift in Sources */,

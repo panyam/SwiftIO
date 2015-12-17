@@ -10,7 +10,7 @@
 import Foundation
 
 
-public class CFSocketClientTransport : ClientTransport {
+public class CFStreamClientTransport : ClientTransport {
     var connection : Connection?
     var clientSocketNative : CFSocketNativeHandle
     var readStream : CFReadStream?
@@ -143,7 +143,7 @@ public class CFSocketClientTransport : ClientTransport {
 
     private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
     {
-        let selfAsOpaque = Unmanaged<CFSocketClientTransport>.passUnretained(self).toOpaque()
+        let selfAsOpaque = Unmanaged<CFStreamClientTransport>.passUnretained(self).toOpaque()
         let selfAsVoidPtr = UnsafeMutablePointer<Void>(selfAsOpaque)
         return selfAsVoidPtr
     }
