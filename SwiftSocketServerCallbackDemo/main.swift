@@ -30,7 +30,7 @@ class EchoConnection
     func readAndEcho()
     {
         socketStream.read(buffer, length: BUFFER_LENGTH) { (buffer, length, error) -> () in
-            if error != nil {
+            if error == nil {
                 self.socketStream.write(buffer!, length: length!, callback: nil);
                 self.readAndEcho()
             }
