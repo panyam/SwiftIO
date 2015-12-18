@@ -1,5 +1,5 @@
 #
-# Be sure to run `pod lib lint SwiftSocketServer.podspec' to ensure this is a
+# Be sure to run `pod lib lint SwiftIO.podspec' to ensure this is a
 # valid spec before submitting.
 #
 # Any lines starting with a # are optional, but their use is encouraged
@@ -7,7 +7,7 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = "SwiftSocketServer"
+  s.name             = "SwiftIO"
   s.version          = "0.0.1"
   s.summary          = "A simple wrapper around servers built on sockets to hide all the messy details."
 
@@ -19,10 +19,10 @@ Pod::Spec.new do |s|
                         to process requests for any given protoocol.
                        DESC
 
-  s.homepage         = "https://github.com/panyam/SwiftSocketServer"
+  s.homepage         = "https://github.com/panyam/SwiftIO"
   s.license          = 'MIT'
   s.author           = { "Sriram Panyam" => "sri.panyam@gmail.com" }
-  s.source           = { :git => "https://github.com/panyam/SwiftSocketServer.git", :tag => s.version.to_s }
+  s.source           = { :git => "https://github.com/panyam/SwiftIO.git", :tag => s.version.to_s }
 
   s.platform     = :ios, '8.0'
   # s.platform     = :osx, '10.9'
@@ -31,7 +31,7 @@ Pod::Spec.new do |s|
 
   s.source_files = 'Sources/**/*'
   s.resource_bundles = {
-    'SwiftSocketServer' => ['Pod/Assets/*.png']
+    'SwiftIO' => ['Pod/Assets/*.png']
   }
 
   s.public_header_files = 'Sources/*.h'

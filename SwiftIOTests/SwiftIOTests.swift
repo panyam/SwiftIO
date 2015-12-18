@@ -1,15 +1,15 @@
 //
-//  SwiftSocketServerTests.swift
-//  SwiftSocketServerTests
+//  SwiftIOTests.swift
+//  SwiftIOTests
 //
 //  Created by Sriram Panyam on 12/15/15.
 //  Copyright © 2015 Sriram Panyam. All rights reserved.
 //
 
 import XCTest
-@testable import SwiftSocketServer
+@testable import SwiftIO
 
-class SwiftSocketServerTests: XCTestCase {
+class SwiftIOTests: XCTestCase {
     
     override func setUp() {
         super.setUp()

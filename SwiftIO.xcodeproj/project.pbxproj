@@ -24,8 +24,8 @@
 		F73A8CAD1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
 		F73A8CAE1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
 		F73A8CAF1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
-		F7CF64451C2094B900493204 /* SwiftSocketServer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */; };
-		F7CF644A1C2094B900493204 /* SwiftSocketServerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64491C2094B900493204 /* SwiftSocketServerTests.swift */; };
+		F7CF64451C2094B900493204 /* SwiftIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF643A1C2094B900493204 /* SwiftIO.framework */; };
+		F7CF644A1C2094B900493204 /* SwiftIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64491C2094B900493204 /* SwiftIOTests.swift */; };
 		F7CF645B1C2094F600493204 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF645A1C2094F600493204 /* main.swift */; };
 		F7CF64631C20958D00493204 /* CFSocketClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64601C20958D00493204 /* CFSocketClientTransport.swift */; };
 		F7CF64641C20958D00493204 /* CFSocketServerTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */; };
@@ -34,7 +34,7 @@
 		F7CF64671C2095E600493204 /* CFSocketServerTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */; };
 		F7CF64681C2095E600493204 /* Transport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64621C20958D00493204 /* Transport.swift */; };
 		F7CF646A1C209A1700493204 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF64691C209A1700493204 /* CoreFoundation.framework */; };
-		F7CF64721C20C07A00493204 /* SwiftSocketServer.h in Headers */ = {isa = PBXBuildFile; fileRef = F7CF64711C20C07A00493204 /* SwiftSocketServer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F7CF64721C20C07A00493204 /* SwiftIO.h in Headers */ = {isa = PBXBuildFile; fileRef = F7CF64711C20C07A00493204 /* SwiftIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -43,21 +43,21 @@
 			containerPortal = F7CF64311C2094B900493204 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F7CF64391C2094B900493204;
-			remoteInfo = SwiftSocketServer;
+			remoteInfo = SwiftIO;
 		};
 		F7CF64461C2094B900493204 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F7CF64311C2094B900493204 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F7CF64391C2094B900493204;
-			remoteInfo = SwiftSocketServer;
+			remoteInfo = SwiftIO;
 		};
 		F7CF646B1C209CCA00493204 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F7CF64311C2094B900493204 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F7CF64391C2094B900493204;
-			remoteInfo = SwiftSocketServer;
+			remoteInfo = SwiftIO;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -85,22 +85,22 @@
 /* Begin PBXFileReference section */
 		F73A8C8F1C22726F00352333 /* SocketStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketStream.swift; sourceTree = "<group>"; };
 		F73A8C911C22863F00352333 /* ErrorTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorTypes.swift; sourceTree = "<group>"; };
-		F73A8C991C229CC900352333 /* SwiftSocketServerCallbackDemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftSocketServerCallbackDemo; sourceTree = BUILT_PRODUCTS_DIR; };
+		F73A8C991C229CC900352333 /* SwiftIOCallbackDemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftIOCallbackDemo; sourceTree = BUILT_PRODUCTS_DIR; };
 		F73A8C9B1C229CC900352333 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFStreamClientTransport.swift; sourceTree = "<group>"; };
 		F73A8CAB1C23A83C00352333 /* Streams.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Streams.swift; sourceTree = "<group>"; };
-		F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftSocketServer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F7CF643A1C2094B900493204 /* SwiftIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7CF643F1C2094B900493204 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F7CF64441C2094B900493204 /* SwiftSocketServerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftSocketServerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F7CF64491C2094B900493204 /* SwiftSocketServerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSocketServerTests.swift; sourceTree = "<group>"; };
+		F7CF64441C2094B900493204 /* SwiftIOTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftIOTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F7CF64491C2094B900493204 /* SwiftIOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftIOTests.swift; sourceTree = "<group>"; };
 		F7CF644B1C2094B900493204 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F7CF64581C2094F600493204 /* SwiftSocketServerDemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftSocketServerDemo; sourceTree = BUILT_PRODUCTS_DIR; };
+		F7CF64581C2094F600493204 /* SwiftIODemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftIODemo; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7CF645A1C2094F600493204 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F7CF64601C20958D00493204 /* CFSocketClientTransport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFSocketClientTransport.swift; sourceTree = "<group>"; };
 		F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFSocketServerTransport.swift; sourceTree = "<group>"; };
 		F7CF64621C20958D00493204 /* Transport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transport.swift; sourceTree = "<group>"; };
 		F7CF64691C209A1700493204 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		F7CF64711C20C07A00493204 /* SwiftSocketServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftSocketServer.h; sourceTree = "<group>"; };
+		F7CF64711C20C07A00493204 /* SwiftIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftIO.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,7 +123,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F7CF64451C2094B900493204 /* SwiftSocketServer.framework in Frameworks */,
+				F7CF64451C2094B900493204 /* SwiftIO.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,22 +137,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F73A8C9A1C229CC900352333 /* SwiftSocketServerCallbackDemo */ = {
+		F73A8C9A1C229CC900352333 /* SwiftIOCallbackDemo */ = {
 			isa = PBXGroup;
 			children = (
 				F73A8C9B1C229CC900352333 /* main.swift */,
 			);
-			path = SwiftSocketServerCallbackDemo;
+			path = SwiftIOCallbackDemo;
 			sourceTree = "<group>";
 		};
 		F7CF64301C2094B900493204 = {
 			isa = PBXGroup;
 			children = (
 				F7CF64691C209A1700493204 /* CoreFoundation.framework */,
-				F7CF643C1C2094B900493204 /* SwiftSocketServer */,
-				F7CF64481C2094B900493204 /* SwiftSocketServerTests */,
-				F7CF64591C2094F600493204 /* SwiftSocketServerDemo */,
-				F73A8C9A1C229CC900352333 /* SwiftSocketServerCallbackDemo */,
+				F7CF643C1C2094B900493204 /* SwiftIO */,
+				F7CF64481C2094B900493204 /* SwiftIOTests */,
+				F7CF64591C2094F600493204 /* SwiftIODemo */,
+				F73A8C9A1C229CC900352333 /* SwiftIOCallbackDemo */,
 				F7CF643B1C2094B900493204 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -160,39 +160,39 @@
 		F7CF643B1C2094B900493204 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */,
-				F7CF64441C2094B900493204 /* SwiftSocketServerTests.xctest */,
-				F7CF64581C2094F600493204 /* SwiftSocketServerDemo */,
-				F73A8C991C229CC900352333 /* SwiftSocketServerCallbackDemo */,
+				F7CF643A1C2094B900493204 /* SwiftIO.framework */,
+				F7CF64441C2094B900493204 /* SwiftIOTests.xctest */,
+				F7CF64581C2094F600493204 /* SwiftIODemo */,
+				F73A8C991C229CC900352333 /* SwiftIOCallbackDemo */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F7CF643C1C2094B900493204 /* SwiftSocketServer */ = {
+		F7CF643C1C2094B900493204 /* SwiftIO */ = {
 			isa = PBXGroup;
 			children = (
-				F7CF64711C20C07A00493204 /* SwiftSocketServer.h */,
+				F7CF64711C20C07A00493204 /* SwiftIO.h */,
 				F7CF645F1C20958D00493204 /* Sources */,
 				F7CF643F1C2094B900493204 /* Info.plist */,
 			);
-			path = SwiftSocketServer;
+			path = SwiftIO;
 			sourceTree = "<group>";
 		};
-		F7CF64481C2094B900493204 /* SwiftSocketServerTests */ = {
+		F7CF64481C2094B900493204 /* SwiftIOTests */ = {
 			isa = PBXGroup;
 			children = (
-				F7CF64491C2094B900493204 /* SwiftSocketServerTests.swift */,
+				F7CF64491C2094B900493204 /* SwiftIOTests.swift */,
 				F7CF644B1C2094B900493204 /* Info.plist */,
 			);
-			path = SwiftSocketServerTests;
+			path = SwiftIOTests;
 			sourceTree = "<group>";
 		};
-		F7CF64591C2094F600493204 /* SwiftSocketServerDemo */ = {
+		F7CF64591C2094F600493204 /* SwiftIODemo */ = {
 			isa = PBXGroup;
 			children = (
 				F7CF645A1C2094F600493204 /* main.swift */,
 			);
-			path = SwiftSocketServerDemo;
+			path = SwiftIODemo;
 			sourceTree = "<group>";
 		};
 		F7CF645F1C20958D00493204 /* Sources */ = {
@@ -217,16 +217,16 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F7CF64721C20C07A00493204 /* SwiftSocketServer.h in Headers */,
+				F7CF64721C20C07A00493204 /* SwiftIO.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		F73A8C981C229CC900352333 /* SwiftSocketServerCallbackDemo */ = {
+		F73A8C981C229CC900352333 /* SwiftIOCallbackDemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F73A8C9F1C229CC900352333 /* Build configuration list for PBXNativeTarget "SwiftSocketServerCallbackDemo" */;
+			buildConfigurationList = F73A8C9F1C229CC900352333 /* Build configuration list for PBXNativeTarget "SwiftIOCallbackDemo" */;
 			buildPhases = (
 				F73A8C951C229CC900352333 /* Sources */,
 				F73A8C961C229CC900352333 /* Frameworks */,
@@ -237,14 +237,14 @@
 			dependencies = (
 				F73A8CA61C229E1D00352333 /* PBXTargetDependency */,
 			);
-			name = SwiftSocketServerCallbackDemo;
-			productName = SwiftSocketServerCallbackDemo;
-			productReference = F73A8C991C229CC900352333 /* SwiftSocketServerCallbackDemo */;
+			name = SwiftIOCallbackDemo;
+			productName = SwiftIOCallbackDemo;
+			productReference = F73A8C991C229CC900352333 /* SwiftIOCallbackDemo */;
 			productType = "com.apple.product-type.tool";
 		};
-		F7CF64391C2094B900493204 /* SwiftSocketServer */ = {
+		F7CF64391C2094B900493204 /* SwiftIO */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F7CF644E1C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServer" */;
+			buildConfigurationList = F7CF644E1C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftIO" */;
 			buildPhases = (
 				F7CF64351C2094B900493204 /* Sources */,
 				F7CF64361C2094B900493204 /* Frameworks */,
@@ -255,14 +255,14 @@
 			);
 			dependencies = (
 			);
-			name = SwiftSocketServer;
-			productName = SwiftSocketServer;
-			productReference = F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */;
+			name = SwiftIO;
+			productName = SwiftIO;
+			productReference = F7CF643A1C2094B900493204 /* SwiftIO.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		F7CF64431C2094B900493204 /* SwiftSocketServerTests */ = {
+		F7CF64431C2094B900493204 /* SwiftIOTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F7CF64511C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServerTests" */;
+			buildConfigurationList = F7CF64511C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftIOTests" */;
 			buildPhases = (
 				F7CF64401C2094B900493204 /* Sources */,
 				F7CF64411C2094B900493204 /* Frameworks */,
@@ -273,14 +273,14 @@
 			dependencies = (
 				F7CF64471C2094B900493204 /* PBXTargetDependency */,
 			);
-			name = SwiftSocketServerTests;
-			productName = SwiftSocketServerTests;
-			productReference = F7CF64441C2094B900493204 /* SwiftSocketServerTests.xctest */;
+			name = SwiftIOTests;
+			productName = SwiftIOTests;
+			productReference = F7CF64441C2094B900493204 /* SwiftIOTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		F7CF64571C2094F600493204 /* SwiftSocketServerDemo */ = {
+		F7CF64571C2094F600493204 /* SwiftIODemo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F7CF645C1C2094F600493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServerDemo" */;
+			buildConfigurationList = F7CF645C1C2094F600493204 /* Build configuration list for PBXNativeTarget "SwiftIODemo" */;
 			buildPhases = (
 				F7CF64541C2094F600493204 /* Sources */,
 				F7CF64551C2094F600493204 /* Frameworks */,
@@ -291,9 +291,9 @@
 			dependencies = (
 				F7CF646C1C209CCA00493204 /* PBXTargetDependency */,
 			);
-			name = SwiftSocketServerDemo;
-			productName = SwiftSocketServerDemo;
-			productReference = F7CF64581C2094F600493204 /* SwiftSocketServerDemo */;
+			name = SwiftIODemo;
+			productName = SwiftIODemo;
+			productReference = F7CF64581C2094F600493204 /* SwiftIODemo */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -320,7 +320,7 @@
 					};
 				};
 			};
-			buildConfigurationList = F7CF64341C2094B900493204 /* Build configuration list for PBXProject "SwiftSocketServer" */;
+			buildConfigurationList = F7CF64341C2094B900493204 /* Build configuration list for PBXProject "SwiftIO" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -332,10 +332,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F7CF64391C2094B900493204 /* SwiftSocketServer */,
-				F7CF64431C2094B900493204 /* SwiftSocketServerTests */,
-				F7CF64571C2094F600493204 /* SwiftSocketServerDemo */,
-				F73A8C981C229CC900352333 /* SwiftSocketServerCallbackDemo */,
+				F7CF64391C2094B900493204 /* SwiftIO */,
+				F7CF64431C2094B900493204 /* SwiftIOTests */,
+				F7CF64571C2094F600493204 /* SwiftIODemo */,
+				F73A8C981C229CC900352333 /* SwiftIOCallbackDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -391,7 +391,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F7CF644A1C2094B900493204 /* SwiftSocketServerTests.swift in Sources */,
+				F7CF644A1C2094B900493204 /* SwiftIOTests.swift in Sources */,
 				F73A8CAD1C23A83C00352333 /* Streams.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -416,17 +416,17 @@
 /* Begin PBXTargetDependency section */
 		F73A8CA61C229E1D00352333 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F7CF64391C2094B900493204 /* SwiftSocketServer */;
+			target = F7CF64391C2094B900493204 /* SwiftIO */;
 			targetProxy = F73A8CA51C229E1D00352333 /* PBXContainerItemProxy */;
 		};
 		F7CF64471C2094B900493204 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F7CF64391C2094B900493204 /* SwiftSocketServer */;
+			target = F7CF64391C2094B900493204 /* SwiftIO */;
 			targetProxy = F7CF64461C2094B900493204 /* PBXContainerItemProxy */;
 		};
 		F7CF646C1C209CCA00493204 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F7CF64391C2094B900493204 /* SwiftSocketServer */;
+			target = F7CF64391C2094B900493204 /* SwiftIO */;
 			targetProxy = F7CF646B1C209CCA00493204 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -541,10 +541,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = SwiftSocketServer/Info.plist;
+				INFOPLIST_FILE = SwiftIO/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.panyam.SwiftSocketServer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyam.SwiftIO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -559,10 +559,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = SwiftSocketServer/Info.plist;
+				INFOPLIST_FILE = SwiftIO/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.panyam.SwiftSocketServer;
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyam.SwiftIO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -572,9 +572,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SwiftSocketServerTests/Info.plist;
+				INFOPLIST_FILE = SwiftIOTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.panyam.SwiftSocketServerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyam.SwiftIOTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -583,9 +583,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SwiftSocketServerTests/Info.plist;
+				INFOPLIST_FILE = SwiftIOTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.panyam.SwiftSocketServerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.panyam.SwiftIOTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -607,7 +607,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F73A8C9F1C229CC900352333 /* Build configuration list for PBXNativeTarget "SwiftSocketServerCallbackDemo" */ = {
+		F73A8C9F1C229CC900352333 /* Build configuration list for PBXNativeTarget "SwiftIOCallbackDemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F73A8C9D1C229CC900352333 /* Debug */,
@@ -616,7 +616,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F7CF64341C2094B900493204 /* Build configuration list for PBXProject "SwiftSocketServer" */ = {
+		F7CF64341C2094B900493204 /* Build configuration list for PBXProject "SwiftIO" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F7CF644C1C2094B900493204 /* Debug */,
@@ -625,7 +625,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F7CF644E1C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServer" */ = {
+		F7CF644E1C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftIO" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F7CF644F1C2094B900493204 /* Debug */,
@@ -634,7 +634,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F7CF64511C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServerTests" */ = {
+		F7CF64511C2094B900493204 /* Build configuration list for PBXNativeTarget "SwiftIOTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F7CF64521C2094B900493204 /* Debug */,
@@ -643,7 +643,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F7CF645C1C2094F600493204 /* Build configuration list for PBXNativeTarget "SwiftSocketServerDemo" */ = {
+		F7CF645C1C2094F600493204 /* Build configuration list for PBXNativeTarget "SwiftIODemo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F7CF645D1C2094F600493204 /* Debug */,

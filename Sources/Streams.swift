@@ -1,6 +1,6 @@
 //
 //  Streams.swift
-//  SwiftSocketServer
+//  SwiftIO
 //
 //  Created by Sriram Panyam on 12/17/15.
 //  Copyright © 2015 Sriram Panyam. All rights reserved.
