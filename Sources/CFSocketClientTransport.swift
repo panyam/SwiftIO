@@ -134,7 +134,7 @@ public class CFSocketClientTransport : ClientTransport {
                 if bytesRead > 0 {
                     connection?.dataReceived(bytesRead)
                 } else if bytesRead < 0 {
-                    handleReadError()
+                    handleReadError(errno)
                 } else {
                     // peer has closed so should we finish?
                     clearReadyToRead()
@@ -154,7 +154,7 @@ public class CFSocketClientTransport : ClientTransport {
                     connection?.dataWritten(numWritten)
                 } else if numWritten < 0 {
                     // error?
-                    handleWriteError()
+                    handleWriteError(errno)
                 } else {
                     print("0 bytes sent")
                 }
@@ -181,17 +181,13 @@ public class CFSocketClientTransport : ClientTransport {
         clearReadyToWrite()
     }
     
-    func handleReadError() {
-//        let error = CFReadStreamGetError(readStream);
-//        print("Read error: \(error)")
-//        connection?.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: Int(error.error), message: ""))
+    func handleReadError(errorCode: Int32) {
+        connection?.receivedReadError(SocketErrorType(domain: "POSIX", code: errorCode, message: "Socket read error"))
         close()
     }
     
-    func handleWriteError() {
-//        let error = CFWriteStreamGetError(writeStream);
-//        print("Write error: \(error)")
-//        connection?.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: Int(error.error), message: ""))
+    func handleWriteError(errorCode: Int32) {
+        connection?.receivedWriteError(SocketErrorType(domain: "POSIX", code: errorCode, message: "Socket write error"))
         close()
     }
     

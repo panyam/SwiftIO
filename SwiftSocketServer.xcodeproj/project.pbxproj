@@ -20,6 +20,10 @@
 		F73A8CA81C2361A200352333 /* CFStreamClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */; };
 		F73A8CA91C2361A200352333 /* CFStreamClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */; };
 		F73A8CAA1C2361A200352333 /* CFStreamClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */; };
+		F73A8CAC1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
+		F73A8CAD1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
+		F73A8CAE1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
+		F73A8CAF1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
 		F7CF64451C2094B900493204 /* SwiftSocketServer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */; };
 		F7CF644A1C2094B900493204 /* SwiftSocketServerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64491C2094B900493204 /* SwiftSocketServerTests.swift */; };
 		F7CF645B1C2094F600493204 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF645A1C2094F600493204 /* main.swift */; };
@@ -84,6 +88,7 @@
 		F73A8C991C229CC900352333 /* SwiftSocketServerCallbackDemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftSocketServerCallbackDemo; sourceTree = BUILT_PRODUCTS_DIR; };
 		F73A8C9B1C229CC900352333 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFStreamClientTransport.swift; sourceTree = "<group>"; };
+		F73A8CAB1C23A83C00352333 /* Streams.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Streams.swift; sourceTree = "<group>"; };
 		F7CF643A1C2094B900493204 /* SwiftSocketServer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftSocketServer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7CF643F1C2094B900493204 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F7CF64441C2094B900493204 /* SwiftSocketServerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftSocketServerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -199,6 +204,7 @@
 				F7CF64621C20958D00493204 /* Transport.swift */,
 				F73A8C8F1C22726F00352333 /* SocketStream.swift */,
 				F73A8C911C22863F00352333 /* ErrorTypes.swift */,
+				F73A8CAB1C23A83C00352333 /* Streams.swift */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -363,6 +369,7 @@
 				F73A8CA31C229E1000352333 /* SocketStream.swift in Sources */,
 				F73A8CA41C229E1000352333 /* ErrorTypes.swift in Sources */,
 				F73A8C9C1C229CC900352333 /* main.swift in Sources */,
+				F73A8CAF1C23A83C00352333 /* Streams.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,6 +378,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F7CF64641C20958D00493204 /* CFSocketServerTransport.swift in Sources */,
+				F73A8CAC1C23A83C00352333 /* Streams.swift in Sources */,
 				F73A8CA81C2361A200352333 /* CFStreamClientTransport.swift in Sources */,
 				F7CF64651C20958D00493204 /* Transport.swift in Sources */,
 				F73A8C921C22863F00352333 /* ErrorTypes.swift in Sources */,
@@ -384,6 +392,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F7CF644A1C2094B900493204 /* SwiftSocketServerTests.swift in Sources */,
+				F73A8CAD1C23A83C00352333 /* Streams.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -398,6 +407,7 @@
 				F7CF64671C2095E600493204 /* CFSocketServerTransport.swift in Sources */,
 				F7CF64681C2095E600493204 /* Transport.swift in Sources */,
 				F7CF645B1C2094F600493204 /* main.swift in Sources */,
+				F73A8CAE1C23A83C00352333 /* Streams.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -604,6 +614,7 @@
 				F73A8C9E1C229CC900352333 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F7CF64341C2094B900493204 /* Build configuration list for PBXProject "SwiftSocketServer" */ = {
 			isa = XCConfigurationList;

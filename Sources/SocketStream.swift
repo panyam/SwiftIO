@@ -8,9 +8,6 @@
 
 import Foundation
 
-public typealias BufferType = UnsafeMutablePointer<UInt8>
-public typealias IOCallback = (buffer: BufferType?, length: Int?, error: ErrorType?) -> ()
-
 public class ConnectionClosedError : ErrorType {
 }
 
@@ -23,7 +20,7 @@ public class ConnectionClosedError : ErrorType {
  * To over come this, this class provides read and write methods
  * with async callbacks.
  */
-public class SocketStream : Connection {
+public class SocketStream : Connection, Reader, Writer {
     private class IORequest
     {
         var buffer: BufferType
@@ -67,7 +64,7 @@ public class SocketStream : Connection {
             self.transport?.setReadyToRead()
         })
     }
-    
+
     public func write(buffer: BufferType, length: Int, callback: IOCallback?)
     {
         transport?.performBlock({ () -> Void in

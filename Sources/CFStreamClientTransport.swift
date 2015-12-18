@@ -204,14 +204,14 @@ public class CFStreamClientTransport : ClientTransport {
     func handleReadError() {
         let error = CFReadStreamGetError(readStream);
         print("Read error: \(error)")
-        connection?.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: Int(error.error), message: ""))
+        connection?.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
         close()
     }
     
     func handleWriteError() {
         let error = CFWriteStreamGetError(writeStream);
         print("Write error: \(error)")
-        connection?.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: Int(error.error), message: ""))
+        connection?.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
         close()
     }
     
@@ -247,7 +247,7 @@ public class CFStreamClientTransport : ClientTransport {
  */
 func readCallback(readStream: CFReadStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
 {
-    let socketConnection = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
+    let socketConnection = Unmanaged<CFStreamClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
     if eventType == CFStreamEventType.HasBytesAvailable {
         socketConnection.hasBytesAvailable()
     } else if eventType == CFStreamEventType.EndEncountered {
@@ -262,7 +262,7 @@ func readCallback(readStream: CFReadStream!, eventType: CFStreamEventType, info:
  */
 func writeCallback(writeStream: CFWriteStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
 {
-    let socketConnection = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
+    let socketConnection = Unmanaged<CFStreamClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
     if eventType == CFStreamEventType.CanAcceptBytes {
         socketConnection.canAcceptBytes();
     } else if eventType == CFStreamEventType.EndEncountered {

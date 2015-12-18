@@ -12,11 +12,11 @@ import Foundation
 public class SocketErrorType : ErrorType
 {
     public var domain : String = ""
-    public var code : Int = 0
+    public var code : Int32 = 0
     public var message : String = ""
     public var data : AnyObject?
     
-    public init(domain : String, code: Int, message: String, data: AnyObject?)
+    public init(domain : String, code: Int32, message: String, data: AnyObject?)
     {
         self.domain = domain
         self.code = code
@@ -24,7 +24,7 @@ public class SocketErrorType : ErrorType
         self.data = data
     }
     
-    public convenience init(domain : String, code: Int, message: String)
+    public convenience init(domain : String, code: Int32, message: String)
     {
         self.init(domain: domain, code: code, message: message, data: nil)
     }
