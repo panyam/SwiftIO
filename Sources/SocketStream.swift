@@ -8,9 +8,6 @@
 
 import Foundation
 
-public class ConnectionClosedError : ErrorType {
-}
-
 /**
  * Implements an async IO wrapper over the Connection.
  * With a traditional connection, all reads and writes happen via
@@ -57,6 +54,10 @@ public class SocketStream : Connection, Reader, Writer {
     {
     }
 
+    public func close()
+    {
+    }
+    
     public func read(buffer: BufferType, length: Int, callback: IOCallback)
     {
         transport?.performBlock({ () -> Void in
@@ -98,7 +99,7 @@ public class SocketStream : Connection, Reader, Writer {
      * Called by the transport when it is ready to send data.
      * Returns the number of bytes of data available.
      */
-    public func writeDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?
+    public func writeDataRequested() -> (buffer: BufferType, length: Int)?
     {
         if let request = writeRequests.first {
             return (request.buffer.advancedBy(request.satisfied), request.remaining())

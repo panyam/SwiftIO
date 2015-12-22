@@ -37,7 +37,7 @@ public protocol Connection {
      * Called by the transport when it is ready to send data.
      * Returns the number of bytes of data available.
      */
-    func writeDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?
+    func writeDataRequested() -> (buffer: BufferType, length: Int)?
     
     /**
      * Called into indicate numWritten bytes have been written.

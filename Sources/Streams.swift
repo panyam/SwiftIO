@@ -9,14 +9,17 @@
 import Foundation
 
 public typealias BufferType = UnsafeMutablePointer<UInt8>
-public typealias IOCallback = (buffer: BufferType?, length: Int?, error: ErrorType?) -> ()
+public typealias IOCallback = (buffer: BufferType, length: Int, error: ErrorType?) -> ()
 
+public protocol Closeable {
+    func close()
+}
 
-public protocol Reader {
+public protocol Reader : Closeable {
     func read(buffer: BufferType, length: Int, callback: IOCallback)
 }
 
-public protocol Writer {
+public protocol Writer : Closeable {
     func write(buffer: BufferType, length: Int, callback: IOCallback?)
 }
 

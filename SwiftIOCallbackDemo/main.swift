@@ -31,7 +31,7 @@ class EchoConnection
     {
         socketStream.read(buffer, length: BUFFER_LENGTH) { (buffer, length, error) -> () in
             if error == nil {
-                self.socketStream.write(buffer!, length: length!, callback: nil);
+                self.socketStream.write(buffer, length: length, callback: nil);
                 self.readAndEcho()
             }
         }

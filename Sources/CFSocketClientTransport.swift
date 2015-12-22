@@ -39,12 +39,12 @@ public class CFSocketClientTransport : ClientTransport {
      */
     public func performBlock(block: (() -> Void))
     {
-//        let currRunLoop = CFRunLoopGetCurrent()
-//        if transportRunLoop == currRunLoop {
-//            block()
-//        } else {
+        let currRunLoop = CFRunLoopGetCurrent()
+        if transportRunLoop === currRunLoop {
+            block()
+        } else {
             CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes, block)
-//        }
+        }
     }
 
     /**

@@ -24,6 +24,11 @@
 		F73A8CAD1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
 		F73A8CAE1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
 		F73A8CAF1C23A83C00352333 /* Streams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CAB1C23A83C00352333 /* Streams.swift */; };
+		F73A8CB11C245C6500352333 /* BufferedStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB01C245C6500352333 /* BufferedStream.swift */; };
+		F73A8CB31C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
+		F73A8CB41C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
+		F73A8CB51C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
+		F73A8CB61C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
 		F7CF64451C2094B900493204 /* SwiftIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF643A1C2094B900493204 /* SwiftIO.framework */; };
 		F7CF644A1C2094B900493204 /* SwiftIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64491C2094B900493204 /* SwiftIOTests.swift */; };
 		F7CF645B1C2094F600493204 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF645A1C2094F600493204 /* main.swift */; };
@@ -89,6 +94,8 @@
 		F73A8C9B1C229CC900352333 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFStreamClientTransport.swift; sourceTree = "<group>"; };
 		F73A8CAB1C23A83C00352333 /* Streams.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Streams.swift; sourceTree = "<group>"; };
+		F73A8CB01C245C6500352333 /* BufferedStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferedStream.swift; sourceTree = "<group>"; };
+		F73A8CB21C245E5900352333 /* Buffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buffer.swift; sourceTree = "<group>"; };
 		F7CF643A1C2094B900493204 /* SwiftIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7CF643F1C2094B900493204 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F7CF64441C2094B900493204 /* SwiftIOTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftIOTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -205,6 +212,8 @@
 				F73A8C8F1C22726F00352333 /* SocketStream.swift */,
 				F73A8C911C22863F00352333 /* ErrorTypes.swift */,
 				F73A8CAB1C23A83C00352333 /* Streams.swift */,
+				F73A8CB01C245C6500352333 /* BufferedStream.swift */,
+				F73A8CB21C245E5900352333 /* Buffer.swift */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -370,6 +379,7 @@
 				F73A8CA41C229E1000352333 /* ErrorTypes.swift in Sources */,
 				F73A8C9C1C229CC900352333 /* main.swift in Sources */,
 				F73A8CAF1C23A83C00352333 /* Streams.swift in Sources */,
+				F73A8CB61C245E5900352333 /* Buffer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -383,7 +393,9 @@
 				F7CF64651C20958D00493204 /* Transport.swift in Sources */,
 				F73A8C921C22863F00352333 /* ErrorTypes.swift in Sources */,
 				F73A8C901C22726F00352333 /* SocketStream.swift in Sources */,
+				F73A8CB11C245C6500352333 /* BufferedStream.swift in Sources */,
 				F7CF64631C20958D00493204 /* CFSocketClientTransport.swift in Sources */,
+				F73A8CB31C245E5900352333 /* Buffer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -393,6 +405,7 @@
 			files = (
 				F7CF644A1C2094B900493204 /* SwiftIOTests.swift in Sources */,
 				F73A8CAD1C23A83C00352333 /* Streams.swift in Sources */,
+				F73A8CB41C245E5900352333 /* Buffer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -408,6 +421,7 @@
 				F7CF64681C2095E600493204 /* Transport.swift in Sources */,
 				F7CF645B1C2094F600493204 /* main.swift in Sources */,
 				F73A8CAE1C23A83C00352333 /* Streams.swift in Sources */,
+				F73A8CB51C245E5900352333 /* Buffer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
