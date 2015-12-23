@@ -33,12 +33,11 @@ private class ConsumerFrame
         let newFrame = ConsumerFrame(consumer)
         newFrame.parentFrame = self
         children.append(newFrame)
-        children.append(newFrame)
     }
     
     func removeIfFinished()
     {
-        if finished {
+        if finished && children.isEmpty {
             // Now no new frames were added *and* the current frame had finished
             // so remove it from its parents child list
             assert(self === parentFrame?.children.first, "Frame MUST be parent's first frame")
@@ -74,30 +73,61 @@ public class BufferedReader : Reader {
         self.dataBuffer = BufferType.alloc(bufferSize)
         frameStack.append(rootFrame)
     }
-    
-    public func close()
-    {
-    }
 
-    public func read(buffer: BufferType, length: Int, callback: IOCallback)
+    /**
+     * Initiate a read for at least one byte.
+     */
+    public func read(buffer: BufferType, length: Int, callback: IOCallback?)
     {
+        let readBuffer = buffer
         let readLength = length
+
         // Simple consumer that takes what ever data is returned
         consumeTill { (buffer, length, error) -> (bytesConsumed: Int, finished: Bool, error: ErrorType?) in
-            callback(buffer: buffer, length: length, error: error)
+            // copy from buffer to readBuffer
+            readBuffer.assignFrom(buffer, count: min(readLength, length))
+            callback?(buffer: readBuffer, length: min(readLength, length), error: error)
             return (min(readLength, length), true, error)
         }
     }
     
     /**
-     * Read till a particular character is encountered (including the delimiter).
+     * Initiate a read for a given size and waits till all the bytes have been returned.
      */
-    public func readTillChar(delimiter: UInt8, callback : (str : String, error: ErrorType?) -> ())
+    public func readFully(buffer: BufferType, length: Int, callback: IOCallback?)
+    {
+        let readBuffer = buffer
+        var totalConsumed = 0
+        let totalRemaining = length
+
+        // Simple consumer that takes what ever data is returned
+        consumeTill { (buffer, length, error) -> (bytesConsumed: Int, finished: Bool, error: ErrorType?) in
+            if error != nil {
+                callback?(buffer: readBuffer, length: totalConsumed, error: error)
+                return (totalConsumed, false, error)
+            }
+            
+            let remaining = totalRemaining - totalConsumed
+            let nCopied = min(remaining, length)
+            readBuffer.advancedBy(totalConsumed).assignFrom(buffer, count: nCopied)
+            totalConsumed += nCopied
+            let finished = totalConsumed >= totalRemaining
+            if finished {
+                callback?(buffer: readBuffer, length: totalConsumed, error: nil)
+            }
+            return (nCopied, finished, nil)
+        }
+    }
+
+    /**
+     * Read till a particular character is encountered (not including the delimiter).
+     */
+    public func readTillChar(delimiter: UInt8, callback : ((str : String, error: ErrorType?) -> ())?)
     {
         var returnedString = ""
         consumeTill { (buffer, length, error) -> (bytesConsumed: Int, finished: Bool, error: ErrorType?) in
             if error != nil {
-                callback(str: returnedString, error: error)
+                callback?(str: returnedString, error: error)
                 return (0, false, error)
             }
             
@@ -108,7 +138,7 @@ public class BufferedReader : Reader {
                 let currChar = buffer[currOffset]
                 if currChar == delimiter {
                     finished = true
-                    callback(str: returnedString, error: nil)
+                    callback?(str: returnedString, error: nil)
                     break
                 } else {
                     returnedString.append(Character(UnicodeScalar(currChar)))
@@ -149,7 +179,13 @@ public class BufferedReader : Reader {
     {
         if let newConsumer = c
         {
-            frameStack.last?.addConsumer(newConsumer)
+            frameStack.last!.addConsumer(newConsumer)
+            if frameStack.last!.callbackCalled {
+                // if callback of the parent was being called then let it complete before
+                // handling its children otherwise we will keep adding children without
+                // advancing the startOffset of any data that may have been read
+                return
+            }
         } else if let error = lastError {
             unwindWithError(error)
             return
@@ -161,22 +197,22 @@ public class BufferedReader : Reader {
         // if we have data in the buffer, pass that to the consumer
         if bytesAvailable > 0 {
             // there is data available so give it to the candidate callback
-            if var frame = frameStack.last {
+            if var currFrame = frameStack.last {
                 // TODO: cache this so that we wont have to compute this each time
-                while frame.firstFrame != nil {
-                    frame = frame.firstFrame!
+                while currFrame.firstFrame != nil {
+                    currFrame = currFrame.firstFrame!
                 }
             
                 // before calling the callback, add the current frame onto the stack
                 // this ensures that any calls to consumeTill made from within this frame
                 // will be added to this frame's child list so we preserve the required
                 // depth first ordering.
-                frameStack.append(frame)
-                frame.callbackCalled = true
-                let (bytesConsumed, finished, error) = frame.callback!(buffer: dataBuffer.advancedBy(startOffset), length: bytesAvailable, error: lastError)
+                frameStack.append(currFrame)
+                currFrame.callbackCalled = true
+                let (bytesConsumed, finished, error) = currFrame.callback!(buffer: dataBuffer.advancedBy(startOffset), length: bytesAvailable, error: lastError)
                 
                 assert(bytesConsumed > 0, "At least one byte must be consumed")
-                assert(bytesConsumed < bytesAvailable, "How can you consume more bytes than is available?")
+                assert(bytesConsumed <= bytesAvailable, "How can you consume more bytes than is available?")
                 
                 startOffset += bytesConsumed
                 if startOffset >= endOffset {
@@ -184,19 +220,19 @@ public class BufferedReader : Reader {
                     endOffset = 0
                 }
                 
-                frame.bytesConsumed += bytesConsumed
-                frame.finished = finished
-                frame.error = error
+                currFrame.bytesConsumed += bytesConsumed
+                currFrame.finished = finished
+                currFrame.error = error
                 
-                while frameStack.last! === frame && frame !== rootFrame {
+                while frameStack.last! === currFrame && currFrame !== rootFrame {
                     // if no new frames were added then this can be removed
-                    frame.callbackCalled = false
+                    currFrame.callbackCalled = false
                     frameStack.removeLast()
 
                     // also remove it from the parent
-                    let parentFrame = frame.parentFrame!
-                    frame.removeIfFinished()
-                    frame = parentFrame
+                    let parentFrame = currFrame.parentFrame!
+                    currFrame.removeIfFinished()
+                    currFrame = parentFrame
                 }
                 
                 // continue consuming bytes for any other consumers we may have left

@@ -1,5 +1,5 @@
 //
-//  SocketStream.swift
+//  Pipe.swift
 //  SwiftIO
 //
 //  Created by Sriram Panyam on 12/16/15.
@@ -17,7 +17,7 @@ import Foundation
  * To over come this, this class provides read and write methods
  * with async callbacks.
  */
-public class SocketStream : Connection, Reader, Writer {
+public class Pipe : Connection, Reader, Writer {
     private class IORequest
     {
         var buffer: BufferType
@@ -36,7 +36,8 @@ public class SocketStream : Connection, Reader, Writer {
             return length - satisfied
         }
         
-        func invokeCallback(err: ErrorType?) {
+        func invokeCallback(err: ErrorType?)
+        {
             if callback != nil {
                 callback!(buffer: buffer, length: satisfied, error: err)
             }
@@ -58,7 +59,7 @@ public class SocketStream : Connection, Reader, Writer {
     {
     }
     
-    public func read(buffer: BufferType, length: Int, callback: IOCallback)
+    public func read(buffer: BufferType, length: Int, callback: IOCallback?)
     {
         transport?.performBlock({ () -> Void in
             self.readRequests.append(IORequest(buffer: buffer, length: length, callback: callback))

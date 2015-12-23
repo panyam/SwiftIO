@@ -14,12 +14,12 @@ let BUFFER_LENGTH = 8192
 
 class EchoConnection
 {
-    var socketStream : SocketStream
+    var pipe : Pipe
     private var buffer = UnsafeMutablePointer<UInt8>.alloc(BUFFER_LENGTH)
 
-    init(sockStream : SocketStream)
+    init(pipe : Pipe)
     {
-        socketStream = sockStream
+        self.pipe = pipe
     }
     
     func start()
@@ -29,9 +29,9 @@ class EchoConnection
     
     func readAndEcho()
     {
-        socketStream.read(buffer, length: BUFFER_LENGTH) { (buffer, length, error) -> () in
+        pipe.read(buffer, length: BUFFER_LENGTH) { (buffer, length, error) -> () in
             if error == nil {
-                self.socketStream.write(buffer, length: length, callback: nil);
+                self.pipe.write(buffer, length: length, callback: nil);
                 self.readAndEcho()
             }
         }
@@ -42,12 +42,12 @@ var connections = [EchoConnection]()
 
 class EchoFactory : ConnectionFactory {
     func createNewConnection() -> Connection {
-        return SocketStream()
+        return Pipe()
     }
     
     func connectionStarted(connection: Connection) {
-        let sockStream = connection as! SocketStream
-        let echoConn = EchoConnection(sockStream: sockStream)
+        let pipe = connection as! Pipe
+        let echoConn = EchoConnection(pipe: pipe)
         connections.append(echoConn)
         echoConn.start()
     }

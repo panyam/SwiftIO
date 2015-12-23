@@ -77,6 +77,7 @@ public class CFSocketServerTransport : ServerTransport
     }
     
     public func stop() {
+        CFSocketInvalidate(serverSocket)
     }
 
     func handleConnection(clientSocketNativeHandle : CFSocketNativeHandle)
