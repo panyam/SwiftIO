@@ -7,15 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F73A8C901C22726F00352333 /* Pipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C8F1C22726F00352333 /* Pipe.swift */; };
 		F73A8C921C22863F00352333 /* ErrorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C911C22863F00352333 /* ErrorTypes.swift */; };
-		F73A8C931C2286E700352333 /* Pipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C8F1C22726F00352333 /* Pipe.swift */; };
 		F73A8C941C2286E700352333 /* ErrorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C911C22863F00352333 /* ErrorTypes.swift */; };
 		F73A8C9C1C229CC900352333 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C9B1C229CC900352333 /* main.swift */; };
 		F73A8CA01C229E1000352333 /* CFSocketClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64601C20958D00493204 /* CFSocketClientTransport.swift */; };
 		F73A8CA11C229E1000352333 /* CFSocketServerTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */; };
 		F73A8CA21C229E1000352333 /* Transport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64621C20958D00493204 /* Transport.swift */; };
-		F73A8CA31C229E1000352333 /* Pipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C8F1C22726F00352333 /* Pipe.swift */; };
 		F73A8CA41C229E1000352333 /* ErrorTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8C911C22863F00352333 /* ErrorTypes.swift */; };
 		F73A8CA81C2361A200352333 /* CFStreamClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */; };
 		F73A8CA91C2361A200352333 /* CFStreamClientTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CA71C2361A200352333 /* CFStreamClientTransport.swift */; };
@@ -91,7 +88,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		F73A8C8F1C22726F00352333 /* Pipe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pipe.swift; sourceTree = "<group>"; };
 		F73A8C911C22863F00352333 /* ErrorTypes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorTypes.swift; sourceTree = "<group>"; };
 		F73A8C991C229CC900352333 /* SwiftIOCallbackDemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SwiftIOCallbackDemo; sourceTree = BUILT_PRODUCTS_DIR; };
 		F73A8C9B1C229CC900352333 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -213,7 +209,6 @@
 				F7CF64601C20958D00493204 /* CFSocketClientTransport.swift */,
 				F7CF64611C20958D00493204 /* CFSocketServerTransport.swift */,
 				F7CF64621C20958D00493204 /* Transport.swift */,
-				F73A8C8F1C22726F00352333 /* Pipe.swift */,
 				F73A8C911C22863F00352333 /* ErrorTypes.swift */,
 				F73A8CAB1C23A83C00352333 /* Streams.swift */,
 				F73A8CB01C245C6500352333 /* BufferedReader.swift */,
@@ -381,7 +376,6 @@
 				F73A8CAA1C2361A200352333 /* CFStreamClientTransport.swift in Sources */,
 				F7F130481C2A758100CA528A /* BufferedWriter.swift in Sources */,
 				F73A8CA21C229E1000352333 /* Transport.swift in Sources */,
-				F73A8CA31C229E1000352333 /* Pipe.swift in Sources */,
 				F73A8CA41C229E1000352333 /* ErrorTypes.swift in Sources */,
 				F73A8C9C1C229CC900352333 /* main.swift in Sources */,
 				F73A8CAF1C23A83C00352333 /* Streams.swift in Sources */,
@@ -399,7 +393,6 @@
 				F7F130461C2A758100CA528A /* BufferedWriter.swift in Sources */,
 				F7CF64651C20958D00493204 /* Transport.swift in Sources */,
 				F73A8C921C22863F00352333 /* ErrorTypes.swift in Sources */,
-				F73A8C901C22726F00352333 /* Pipe.swift in Sources */,
 				F73A8CB11C245C6500352333 /* BufferedReader.swift in Sources */,
 				F7CF64631C20958D00493204 /* CFSocketClientTransport.swift in Sources */,
 				F73A8CB31C245E5900352333 /* Buffer.swift in Sources */,
@@ -420,7 +413,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F73A8C931C2286E700352333 /* Pipe.swift in Sources */,
 				F73A8C941C2286E700352333 /* ErrorTypes.swift in Sources */,
 				F73A8CA91C2361A200352333 /* CFStreamClientTransport.swift in Sources */,
 				F7F130471C2A758100CA528A /* BufferedWriter.swift in Sources */,

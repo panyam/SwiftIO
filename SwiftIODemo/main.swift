@@ -73,8 +73,8 @@ class EchoConnection : Connection
     }
 }
 
-class EchoFactory : ConnectionFactory {
-    func createNewConnection() -> Connection {
+class EchoFactory : StreamFactory {
+    func createNewStream() -> Connection {
         return EchoConnection()
     }
     func connectionStarted(connection : Connection)
@@ -83,7 +83,7 @@ class EchoFactory : ConnectionFactory {
 }
 
 var server = CFSocketServerTransport(nil)
-server.connectionFactory = EchoFactory()
+server.streamFactory = EchoFactory()
 server.start()
 
 while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, false) != CFRunLoopRunResult.Finished {

@@ -46,7 +46,7 @@ public class CFSocketServerTransport : ServerTransport
     public var serverPortV6 : UInt16 = DEFAULT_SERVER_PORT
     private var serverSocket : CFSocket?
     private var serverSocketV6 : CFSocket?
-    public var connectionFactory : ConnectionFactory?
+    public var streamFactory : StreamFactory?
     private var transportRunLoop : CFRunLoop
     
     public init(var _ runLoop : CFRunLoop?)
@@ -58,7 +58,7 @@ public class CFSocketServerTransport : ServerTransport
         transportRunLoop = runLoop!
     }
     
-    public func start() -> SocketErrorType?
+    public func start() -> ErrorType?
     {
         if isRunning {
             NSLog("Server is already running")
@@ -82,12 +82,12 @@ public class CFSocketServerTransport : ServerTransport
 
     func handleConnection(clientSocketNativeHandle : CFSocketNativeHandle)
     {
-        if var connection = connectionFactory?.createNewConnection()
+        if var stream = streamFactory?.createNewStream()
         {
             let clientTransport = CFSocketClientTransport(clientSocketNativeHandle, runLoop: transportRunLoop)
-            connection.transport = clientTransport
-            clientTransport.connection = connection
-            connectionFactory?.connectionStarted(connection);
+            stream.transport = clientTransport
+            clientTransport.stream = stream
+            streamFactory?.streamStarted(stream)
         } else {
             // TODO: close the socket since no connection delegate was found
         }

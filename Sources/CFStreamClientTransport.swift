@@ -11,7 +11,7 @@ import Foundation
 
 
 public class CFStreamClientTransport : ClientTransport {
-    var connection : Connection?
+    var stream : Stream?
     var clientSocketNative : CFSocketNativeHandle
     var readStream : CFReadStream?
     var writeStream : CFWriteStream?
@@ -149,50 +149,55 @@ public class CFStreamClientTransport : ClientTransport {
     }
     
     func connectionClosed() {
-        connection?.connectionClosed()
+        assert(false, "not yet implemented")
+//        stream?.connectionClosed()
     }
     
     func hasBytesAvailable() {
         // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
-        if let (buffer, length) = connection?.readDataRequested() {
-            if length > 0 {
-                let bytesRead = CFReadStreamRead(readStream, buffer, length);
-                if bytesRead > 0 {
-                    connection?.dataReceived(bytesRead)
-                } else if bytesRead < 0 {
-                    handleReadError()
+        if let consumer = stream?.consumer {
+            if let (buffer, length) = consumer.readDataRequested() {
+                if length > 0 {
+                    let bytesRead = CFReadStreamRead(readStream, buffer, length);
+                    if bytesRead > 0 {
+                        consumer.dataReceived(bytesRead)
+                    } else if bytesRead < 0 {
+                        handleReadError()
+                    }
+                    return
                 }
-                return
             }
         }
 //        clearReadyToRead()
     }
     
     func canAcceptBytes() {
-        if let (buffer, length) = connection?.writeDataRequested() {
-            if length > 0 {
-                let numWritten = CFWriteStreamWrite(writeStream, buffer, length)
-                if numWritten > 0 {
-                    connection?.dataWritten(numWritten)
-                } else if numWritten < 0 {
-                    // error?
-                    handleWriteError()
-                }
-                
-                if numWritten >= 0 && numWritten < length {
-                    // only partial data written so dont clear writeable.
-                    // if this is the case then for an edge triggered API
-                    // we have to ensure that canAcceptBytes will eventually 
-                    // get called.  So kick it off later on.
-                    // TODO: ensure that we have some kind of backoff so that 
-                    // these async triggers dont flood the run loop if the write
-                    // stream is backed
-                    if writesAreEdgeTriggered {
-                        CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) {
-                            self.canAcceptBytes()
-                        }
+        if let producer = stream?.producer {
+            if let (buffer, length) = producer.writeDataRequested() {
+                if length > 0 {
+                    let numWritten = CFWriteStreamWrite(writeStream, buffer, length)
+                    if numWritten > 0 {
+                        producer.dataWritten(numWritten)
+                    } else if numWritten < 0 {
+                        // error?
+                        handleWriteError()
                     }
-                    return
+                    
+                    if numWritten >= 0 && numWritten < length {
+                        // only partial data written so dont clear writeable.
+                        // if this is the case then for an edge triggered API
+                        // we have to ensure that canAcceptBytes will eventually
+                        // get called.  So kick it off later on.
+                        // TODO: ensure that we have some kind of backoff so that
+                        // these async triggers dont flood the run loop if the write
+                        // stream is backed
+                        if writesAreEdgeTriggered {
+                            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) {
+                                self.canAcceptBytes()
+                            }
+                        }
+                        return
+                    }
                 }
             }
         }
@@ -204,14 +209,20 @@ public class CFStreamClientTransport : ClientTransport {
     func handleReadError() {
         let error = CFReadStreamGetError(readStream);
         print("Read error: \(error)")
-        connection?.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
+        if let consumer = stream?.consumer
+        {
+            consumer.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
+        }
         close()
     }
     
     func handleWriteError() {
         let error = CFWriteStreamGetError(writeStream);
         print("Write error: \(error)")
-        connection?.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
+        if let producer = stream?.producer
+        {
+            producer.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
+        }
         close()
     }
     
