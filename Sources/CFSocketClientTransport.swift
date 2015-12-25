@@ -44,6 +44,7 @@ public class CFSocketClientTransport : ClientTransport {
             block()
         } else {
             CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes, block)
+            CFRunLoopWakeUp(transportRunLoop)
         }
     }
 
@@ -63,9 +64,9 @@ public class CFSocketClientTransport : ClientTransport {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if writesAreEdgeTriggered {
-            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) { () -> Void in
+            self.performBlock({ () -> Void in
                 self.canAcceptBytes()
-            }
+            })
         }
     }
     
@@ -78,9 +79,7 @@ public class CFSocketClientTransport : ClientTransport {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if readsAreEdgeTriggered {
-            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) { () -> Void in
-                self.hasBytesAvailable()
-            }
+            self.performBlock { () -> Void in self.hasBytesAvailable() }
         }
     }
     
@@ -174,7 +173,7 @@ public class CFSocketClientTransport : ClientTransport {
                         // these async triggers dont flood the run loop if the write
                         // stream is backed
                         if writesAreEdgeTriggered {
-                            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) {
+                            self.performBlock { () -> Void in
                                 self.canAcceptBytes()
                             }
                         }

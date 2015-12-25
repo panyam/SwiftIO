@@ -40,6 +40,9 @@
 		F7F130461C2A758100CA528A /* BufferedWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F130451C2A758100CA528A /* BufferedWriter.swift */; };
 		F7F130471C2A758100CA528A /* BufferedWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F130451C2A758100CA528A /* BufferedWriter.swift */; };
 		F7F130481C2A758100CA528A /* BufferedWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F130451C2A758100CA528A /* BufferedWriter.swift */; };
+		F7F1304C1C2C00EE00CA528A /* FileStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F1304B1C2C00EE00CA528A /* FileStreams.swift */; };
+		F7F1304D1C2C00EE00CA528A /* FileStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F1304B1C2C00EE00CA528A /* FileStreams.swift */; };
+		F7F1304E1C2C00EE00CA528A /* FileStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F1304B1C2C00EE00CA528A /* FileStreams.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +111,7 @@
 		F7CF64691C209A1700493204 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		F7CF64711C20C07A00493204 /* SwiftIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftIO.h; sourceTree = "<group>"; };
 		F7F130451C2A758100CA528A /* BufferedWriter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferedWriter.swift; sourceTree = "<group>"; };
+		F7F1304B1C2C00EE00CA528A /* FileStreams.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileStreams.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -214,6 +218,7 @@
 				F73A8CB01C245C6500352333 /* BufferedReader.swift */,
 				F73A8CB21C245E5900352333 /* Buffer.swift */,
 				F7F130451C2A758100CA528A /* BufferedWriter.swift */,
+				F7F1304B1C2C00EE00CA528A /* FileStreams.swift */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -380,6 +385,7 @@
 				F73A8C9C1C229CC900352333 /* main.swift in Sources */,
 				F73A8CAF1C23A83C00352333 /* Streams.swift in Sources */,
 				F73A8CB61C245E5900352333 /* Buffer.swift in Sources */,
+				F7F1304E1C2C00EE00CA528A /* FileStreams.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,6 +402,7 @@
 				F73A8CB11C245C6500352333 /* BufferedReader.swift in Sources */,
 				F7CF64631C20958D00493204 /* CFSocketClientTransport.swift in Sources */,
 				F73A8CB31C245E5900352333 /* Buffer.swift in Sources */,
+				F7F1304C1C2C00EE00CA528A /* FileStreams.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,6 +429,7 @@
 				F7CF645B1C2094F600493204 /* main.swift in Sources */,
 				F73A8CAE1C23A83C00352333 /* Streams.swift in Sources */,
 				F73A8CB51C245E5900352333 /* Buffer.swift in Sources */,
+				F7F1304D1C2C00EE00CA528A /* FileStreams.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

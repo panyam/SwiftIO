@@ -42,7 +42,7 @@ var connections = [EchoConnection]()
 
 class EchoFactory : StreamFactory {
     func createNewStream() -> Connection {
-        return Pipe()
+        return SimpleStream()
     }
     
     func connectionStarted(connection: Connection) {

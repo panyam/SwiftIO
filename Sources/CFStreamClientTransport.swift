@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import Darwin
 
 
 public class CFStreamClientTransport : ClientTransport {
@@ -16,7 +17,7 @@ public class CFStreamClientTransport : ClientTransport {
     var readStream : CFReadStream?
     var writeStream : CFWriteStream?
     var transportRunLoop : CFRunLoop
-    var readsAreEdgeTriggered = true
+    var readsAreEdgeTriggered = false
     var writesAreEdgeTriggered = true
     
     init(_ clientSock : CFSocketNativeHandle, runLoop: CFRunLoop?) {
@@ -36,12 +37,13 @@ public class CFStreamClientTransport : ClientTransport {
      */
     public func performBlock(block: (() -> Void))
     {
-//        let currRunLoop = CFRunLoopGetCurrent()
-//        if transportRunLoop == currRunLoop {
-//            block()
-//        } else {
+        let currRunLoop = CFRunLoopGetCurrent()
+        if transportRunLoop === currRunLoop {
+            block()
+        } else {
             CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes, block)
-//        }
+            CFRunLoopWakeUp(transportRunLoop)
+        }
     }
 
     /**
@@ -63,7 +65,7 @@ public class CFStreamClientTransport : ClientTransport {
         // It is possible that a client can call this as many as 
         // time as it needs greedily
         if writesAreEdgeTriggered {
-            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) { () -> Void in
+            self.performBlock { () -> Void in
                 self.canAcceptBytes()
             }
         }
@@ -80,7 +82,7 @@ public class CFStreamClientTransport : ClientTransport {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if readsAreEdgeTriggered {
-            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) { () -> Void in
+            self.performBlock { () -> Void in
                 self.hasBytesAvailable()
             }
         }
@@ -155,7 +157,8 @@ public class CFStreamClientTransport : ClientTransport {
     
     func hasBytesAvailable() {
         // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
-        if let consumer = stream?.consumer {
+        if let consumer = stream?.consumer
+        {
             if let (buffer, length) = consumer.readDataRequested() {
                 if length > 0 {
                     let bytesRead = CFReadStreamRead(readStream, buffer, length);
@@ -163,6 +166,10 @@ public class CFStreamClientTransport : ClientTransport {
                         consumer.dataReceived(bytesRead)
                     } else if bytesRead < 0 {
                         handleReadError()
+                    } else {
+                        // peer has closed so should we finish?
+//                        clearReadyToRead()
+                        close()
                     }
                     return
                 }
@@ -172,7 +179,8 @@ public class CFStreamClientTransport : ClientTransport {
     }
     
     func canAcceptBytes() {
-        if let producer = stream?.producer {
+        if let producer = stream?.producer
+        {
             if let (buffer, length) = producer.writeDataRequested() {
                 if length > 0 {
                     let numWritten = CFWriteStreamWrite(writeStream, buffer, length)
@@ -181,6 +189,8 @@ public class CFStreamClientTransport : ClientTransport {
                     } else if numWritten < 0 {
                         // error?
                         handleWriteError()
+                    } else {
+                        print("0 bytes sent")
                     }
                     
                     if numWritten >= 0 && numWritten < length {
@@ -192,7 +202,7 @@ public class CFStreamClientTransport : ClientTransport {
                         // these async triggers dont flood the run loop if the write
                         // stream is backed
                         if writesAreEdgeTriggered {
-                            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes) {
+                            self.performBlock { () -> Void in
                                 self.canAcceptBytes()
                             }
                         }

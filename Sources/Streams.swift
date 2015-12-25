@@ -36,6 +36,7 @@ public protocol Writer {
 public extension Writer {
     public func writeString(string: String, callback: IOCallback?)
     {
+        print(string, terminator: "")
         let nsString = string as NSString
         let length = nsString.lengthOfBytesUsingEncoding(NSUTF8StringEncoding)
         write(UnsafeMutablePointer<UInt8>(nsString.UTF8String), length: length, callback: callback)
@@ -49,16 +50,6 @@ public protocol Stream {
     var transport : ClientTransport? { get set }
     var consumer : StreamConsumer? { get set }
     var producer : StreamProducer? { get set }
-}
-
-public class SimpleStream : Stream {
-    public var transport : ClientTransport?
-    public var consumer : StreamConsumer?
-    public var producer : StreamProducer?
-
-    public init()
-    {
-    }
 }
 
 public protocol StreamConsumer {
@@ -190,7 +181,8 @@ public class StreamWriter : Writer, StreamProducer
         assert(!writeRequests.isEmpty, "Write request queue cannot be empty when we have a data callback")
         if let request = writeRequests.first {
             request.satisfied += numWritten
-            if request.remaining() == 0 {
+            if request.remaining() == 0
+            {
                 // done so pop it off
                 writeRequests.removeFirst()
                 request.invokeCallback(nil)
@@ -256,5 +248,18 @@ public class StreamReader : Reader, StreamConsumer {
             request.invokeCallback(nil)
             //            }
         }
+    }
+}
+
+
+public class SimpleStream : Stream {
+    public var transport : ClientTransport?
+    public var consumer : StreamConsumer?
+    public var producer : StreamProducer?
+    
+    public init()
+    {
+        producer = StreamWriter(self)
+        consumer = StreamReader(self)
     }
 }

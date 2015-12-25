@@ -8,7 +8,80 @@
 
 import Foundation
 
-public typealias ConsumerCallback = (buffer: BufferType, length: Int, error: ErrorType?) -> (bytesConsumed: Int, finished: Bool, error: ErrorType?)
+public class DataBuffer
+{
+    private var bufferSize : Int
+    private var buffer : BufferType
+    private var startOffset : Int = 0
+    private var endOffset : Int = 0
+    
+    public var capacity : Int {
+        return bufferSize
+    }
+    
+    public var length : Int {
+        get {
+            let out = endOffset - startOffset
+            return max(out, 0)
+        }
+    }
+    
+
+    public init(_ bufferSize: Int)
+    {
+        self.bufferSize = bufferSize
+        self.buffer = BufferType.alloc(bufferSize)
+    }
+    
+    public func reset()
+    {
+        startOffset = 0
+        endOffset = 0
+    }
+
+    /**
+     * Advance the stream position by a given number of bytes.
+     * This will be used by the consumer callback to continually update its status.
+     */
+    func advance(bytesConsumed: Int)
+    {
+        startOffset = min(startOffset + bytesConsumed, endOffset)
+    }
+    
+    /**
+     * Return the buffer of the stream beginning at the current position.
+     */
+    var current : BufferType {
+        return buffer.advancedBy(startOffset)
+    }
+    
+    subscript(index: Int) -> UInt8 {
+        get {
+            return buffer[startOffset + index]
+        }
+    }
+    
+    public func read(reader: Reader, callback: IOCallback?)
+    {
+        if startOffset == endOffset
+        {
+            startOffset = 0
+            endOffset = 0
+        }
+
+        // TODO: see if needs resizing or moving or circular management
+        assert(bufferSize > endOffset, "Needs some work here!")
+        reader.read(current, length: bufferSize - endOffset) { (buffer, length, error) -> () in
+            if error == nil {
+                self.endOffset += length
+            }
+            callback?(buffer: buffer, length: length, error: error)
+        }
+    }
+}
+
+public typealias ConsumerCallback = (buffer: DataBuffer, error: ErrorType?) -> (finished: Bool, error: ErrorType?)
+public typealias CompletionCallback = (bytesConsumed: Int, error: ErrorType?) -> ()
 
 /**
  * Keeps track of the reed request "call tree" indiciating where and how 
@@ -19,7 +92,6 @@ private class ConsumerFrame
     weak var parentFrame : ConsumerFrame?
     var callback : ConsumerCallback?
     var callbackCalled = false
-    var bytesConsumed = 0
     var finished = false
     var error : ErrorType? = nil
     var children = [ConsumerFrame]()
@@ -52,25 +124,16 @@ private class ConsumerFrame
 
 public class BufferedReader : Reader {
     private var reader : Reader
-    private var dataBuffer : BufferType
+    private var dataBuffer : DataBuffer
     private var bufferSize : Int = 0
-    private var startOffset : Int = 0
-    private var endOffset : Int = 0
     private var rootFrame = ConsumerFrame(nil)
     private var frameStack = [ConsumerFrame]()
     
-    public var bytesAvailable : Int {
-        get {
-            let out = endOffset - startOffset
-            return max(out, 0)
-        }
-    }
-
     public init (reader: Reader, bufferSize: Int)
     {
         self.reader = reader
         self.bufferSize = bufferSize
-        self.dataBuffer = BufferType.alloc(bufferSize)
+        self.dataBuffer = DataBuffer(bufferSize)
         frameStack.append(rootFrame)
     }
 
@@ -83,11 +146,13 @@ public class BufferedReader : Reader {
         let readLength = length
 
         // Simple consumer that takes what ever data is returned
-        consumeTill { (buffer, length, error) -> (bytesConsumed: Int, finished: Bool, error: ErrorType?) in
+        consume { (buffer, error) -> (finished: Bool, error: ErrorType?) in
             // copy from buffer to readBuffer
-            readBuffer.assignFrom(buffer, count: min(readLength, length))
+            readBuffer.assignFrom(buffer.current, count: min(readLength, length))
+            buffer.advance(min(readLength, length))
+            
             callback?(buffer: readBuffer, length: min(readLength, length), error: error)
-            return (min(readLength, length), true, error)
+            return (true, error)
         }
     }
     
@@ -101,21 +166,23 @@ public class BufferedReader : Reader {
         let totalRemaining = length
 
         // Simple consumer that takes what ever data is returned
-        consumeTill { (buffer, length, error) -> (bytesConsumed: Int, finished: Bool, error: ErrorType?) in
+        consume { (buffer, error) -> (finished: Bool, error: ErrorType?) in
             if error != nil {
                 callback?(buffer: readBuffer, length: totalConsumed, error: error)
-                return (totalConsumed, false, error)
+                return (false, error)
             }
             
             let remaining = totalRemaining - totalConsumed
             let nCopied = min(remaining, length)
-            readBuffer.advancedBy(totalConsumed).assignFrom(buffer, count: nCopied)
+            readBuffer.advancedBy(totalConsumed).assignFrom(buffer.current, count: nCopied)
+            buffer.advance(nCopied)
+
             totalConsumed += nCopied
             let finished = totalConsumed >= totalRemaining
             if finished {
                 callback?(buffer: readBuffer, length: totalConsumed, error: nil)
             }
-            return (nCopied, finished, nil)
+            return (finished, nil)
         }
     }
 
@@ -125,17 +192,18 @@ public class BufferedReader : Reader {
     public func readTillChar(delimiter: UInt8, callback : ((str : String, error: ErrorType?) -> ())?)
     {
         var returnedString = ""
-        consumeTill { (buffer, length, error) -> (bytesConsumed: Int, finished: Bool, error: ErrorType?) in
+        consume { (buffer, error) -> (finished: Bool, error: ErrorType?) in
             if error != nil {
                 callback?(str: returnedString, error: error)
-                return (0, false, error)
+                return (false, error)
             }
             
-            var bytesConsumed = 0
             var finished = false
-            for currOffset in 0..<length {
-                bytesConsumed++
-                let currChar = buffer[currOffset]
+            let length = buffer.length
+            for _ in 0..<length {
+                let currChar = buffer[0]
+                buffer.advance(1)
+                
                 if currChar == delimiter {
                     finished = true
                     callback?(str: returnedString, error: nil)
@@ -144,7 +212,7 @@ public class BufferedReader : Reader {
                     returnedString.append(Character(UnicodeScalar(currChar)))
                 }
             }
-            return (bytesConsumed, finished, nil)
+            return (finished, nil)
         }
     }
     
@@ -170,7 +238,7 @@ public class BufferedReader : Reader {
      * 3. Readers are sequantial streams.  So composability over parallelism is a key requirement.
      * 
      */
-    public func consumeTill(consumer: ConsumerCallback)
+    public func consume(consumer: ConsumerCallback)
     {
         produceBytesForConsumer(consumer, lastError: nil)
     }
@@ -180,12 +248,12 @@ public class BufferedReader : Reader {
         if let newConsumer = c
         {
             frameStack.last!.addConsumer(newConsumer)
-            if frameStack.last!.callbackCalled {
-                // if callback of the parent was being called then let it complete before
-                // handling its children otherwise we will keep adding children without
-                // advancing the startOffset of any data that may have been read
-                return
-            }
+//            if frameStack.last!.callbackCalled {
+//                // if callback of the parent was being called then let it complete before
+//                // handling its children otherwise we will keep adding children without
+//                // advancing the startOffset of any data that may have been read
+//                return
+//            }
         } else if let error = lastError {
             unwindWithError(error)
             return
@@ -195,7 +263,7 @@ public class BufferedReader : Reader {
         
         // ensure this happens in reader's runloop
         // if we have data in the buffer, pass that to the consumer
-        if bytesAvailable > 0 {
+        if dataBuffer.length > 0 {
             // there is data available so give it to the candidate callback
             if var currFrame = frameStack.last {
                 // TODO: cache this so that we wont have to compute this each time
@@ -204,23 +272,14 @@ public class BufferedReader : Reader {
                 }
             
                 // before calling the callback, add the current frame onto the stack
-                // this ensures that any calls to consumeTill made from within this frame
+                // this ensures that any calls to consume made from within this frame
                 // will be added to this frame's child list so we preserve the required
                 // depth first ordering.
                 frameStack.append(currFrame)
                 currFrame.callbackCalled = true
-                let (bytesConsumed, finished, error) = currFrame.callback!(buffer: dataBuffer.advancedBy(startOffset), length: bytesAvailable, error: lastError)
+                let (finished, error) = currFrame.callback!(buffer: dataBuffer, error: lastError)
                 
-                assert(bytesConsumed > 0, "At least one byte must be consumed")
-                assert(bytesConsumed <= bytesAvailable, "How can you consume more bytes than is available?")
-                
-                startOffset += bytesConsumed
-                if startOffset >= endOffset {
-                    startOffset = 0
-                    endOffset = 0
-                }
-                
-                currFrame.bytesConsumed += bytesConsumed
+//                currFrame.bytesConsumed += bytesConsumed
                 currFrame.finished = finished
                 currFrame.error = error
                 
@@ -236,17 +295,14 @@ public class BufferedReader : Reader {
                 }
                 
                 // continue consuming bytes for any other consumers we may have left
-                produceBytesForConsumer(nil, lastError: error)
+                CFRunLoopPerformBlock(CFRunLoopGetCurrent(), kCFRunLoopCommonModes, { () -> Void in
+                    self.produceBytesForConsumer(nil, lastError: error)
+                })
+                CFRunLoopWakeUp(CFRunLoopGetCurrent())
             }
         } else {
             // need to do a read
-            startOffset = 0
-            endOffset = 0
-            reader.read(dataBuffer, length: bufferSize, callback: { (buffer, length, error) -> () in
-                if error == nil {
-                    self.endOffset = length
-                }
-                // call read again so that data in the buffer is returned
+            dataBuffer.read(reader, callback: { (buffer, length, error) -> () in
                 self.produceBytesForConsumer(nil, lastError: error)
             })
         }
