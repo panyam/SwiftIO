@@ -32,10 +32,13 @@ public func FileReader(filePath : String) -> StreamReader
     
     // TODO: this is OSX/CF specific - need a way to make this platform independant
     let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
-    fileStream.setReadStream(CFReadStreamCreateWithFile(kCFAllocatorDefault, fileURL))
+    let readStream = CFReadStreamCreateWithFile(kCFAllocatorDefault, fileURL)
+    fileStream.setReadStream(readStream)
     fileStream.consumer = reader
+    CFReadStreamOpen(readStream)
     return reader
 }
+
 
 public func FileWriter(filePath : String) -> StreamWriter
 {
@@ -44,7 +47,9 @@ public func FileWriter(filePath : String) -> StreamWriter
     
     // TODO: this is OSX/CF specific - need a way to make this platform independant
     let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
-    fileStream.setWriteStream(CFWriteStreamCreateWithFile(kCFAllocatorDefault, fileURL))
+    let writeStream = CFWriteStreamCreateWithFile(kCFAllocatorDefault, fileURL)
+    fileStream.setWriteStream(writeStream)
     fileStream.producer = writer
+    CFWriteStreamOpen(writeStream)
     return writer
 }

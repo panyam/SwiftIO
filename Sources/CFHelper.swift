@@ -138,8 +138,14 @@ public class CFStream : Stream
      * Called to close the stream.
      */
     public func close() {
-        CFReadStreamUnscheduleFromRunLoop(readStream, cfRunLoop, kCFRunLoopCommonModes);
-        CFWriteStreamUnscheduleFromRunLoop(writeStream, cfRunLoop, kCFRunLoopCommonModes);
+        if readStream != nil
+        {
+            CFReadStreamUnscheduleFromRunLoop(readStream, cfRunLoop, kCFRunLoopCommonModes);
+        }
+        if writeStream != nil
+        {
+            CFWriteStreamUnscheduleFromRunLoop(writeStream, cfRunLoop, kCFRunLoopCommonModes);
+        }
     }
     
     /**
