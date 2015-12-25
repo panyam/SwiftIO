@@ -89,10 +89,17 @@ public class CoreFoundationRunLoop : RunLoop
     }
 }
 
-public class CFStreamBase
+public class CFStream : Stream
 {
-    var runLoop : RunLoop
+    public var runLoop : RunLoop
+    public var consumer : StreamConsumer?
+    public var producer : StreamProducer?
+    var readStream : CFReadStream?
+    var readsAreEdgeTriggered = false
     
+    var writeStream : CFWriteStream?
+    var writesAreEdgeTriggered = true
+
     var cfRunLoop : CFRunLoop {
         return (runLoop as! CoreFoundationRunLoop).cfRunLoop
     }
@@ -103,17 +110,10 @@ public class CFStreamBase
     
     private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
     {
-        let selfAsOpaque = Unmanaged<CFStreamBase>.passUnretained(self).toOpaque()
+        let selfAsOpaque = Unmanaged<CFStream>.passUnretained(self).toOpaque()
         let selfAsVoidPtr = UnsafeMutablePointer<Void>(selfAsOpaque)
         return selfAsVoidPtr
     }
-}
-
-public class CFStreamConsumer : CFStreamBase
-{
-    var streamConsumer : StreamConsumer?
-    var readStream : CFReadStream?
-    var readsAreEdgeTriggered = false
     
     public func setReadStream(stream : CFReadStream)
     {
@@ -137,17 +137,8 @@ public class CFStreamConsumer : CFStreamBase
      */
     public func close() {
         CFReadStreamUnscheduleFromRunLoop(readStream, cfRunLoop, kCFRunLoopCommonModes);
+        CFWriteStreamUnscheduleFromRunLoop(writeStream, cfRunLoop, kCFRunLoopCommonModes);
     }
-//
-//    override func runLoopWillChange()
-//    {
-//        CFReadStreamUnscheduleFromRunLoop(readStream, runLoop, kCFRunLoopCommonModes);
-//    }
-//
-//    override func runLoopDidChange()
-//    {
-//        CFReadStreamScheduleWithRunLoop(readStream, runLoop, kCFRunLoopCommonModes);
-//    }
     
     /**
      * Called to indicate that the connection is ready to read data
@@ -190,7 +181,7 @@ public class CFStreamConsumer : CFStreamBase
     
     func hasBytesAvailable() {
         // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
-        if let consumer = streamConsumer
+        if let consumer = self.consumer
         {
             if let (buffer, length) = consumer.readDataRequested() {
                 if length > 0 {
@@ -214,7 +205,7 @@ public class CFStreamConsumer : CFStreamBase
     func handleReadError() {
         let error = CFReadStreamGetError(readStream);
         print("Read error: \(error)")
-        if let consumer = streamConsumer
+        if let consumer = self.consumer
         {
             consumer.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
         }
@@ -225,13 +216,6 @@ public class CFStreamConsumer : CFStreamBase
         assert(false, "not yet implemented")
         //        stream?.connectionClosed()
     }
-}
-
-public class CFStreamProducer : CFStreamBase
-{
-    var streamProducer : StreamProducer?
-    var writeStream : CFWriteStream?
-    var writesAreEdgeTriggered = true
     
     public func setWriteStream(stream : CFWriteStream)
     {
@@ -249,23 +233,6 @@ public class CFStreamProducer : CFStreamBase
             setReadyToWrite()
         }
     }
-
-    /**
-     * Called to close the transport.
-     */
-    public func close() {
-        CFWriteStreamUnscheduleFromRunLoop(writeStream, cfRunLoop, kCFRunLoopCommonModes);
-    }
-    
-//    override func runLoopWillChange()
-//    {
-//        CFWriteStreamUnscheduleFromRunLoop(writeStream, runLoop, kCFRunLoopCommonModes);
-//    }
-//    
-//    override func runLoopDidChange()
-//    {
-//        CFWriteStreamScheduleWithRunLoop(writeStream, runLoop, kCFRunLoopCommonModes);
-//    }
     
     /**
      * Called to indicate that the connection is ready to write data
@@ -307,7 +274,7 @@ public class CFStreamProducer : CFStreamBase
     }
     
     func canAcceptBytes() {
-        if let producer = streamProducer
+        if let producer = self.producer
         {
             if let (buffer, length) = producer.writeDataRequested() {
                 if length > 0 {
@@ -347,16 +314,11 @@ public class CFStreamProducer : CFStreamBase
     func handleWriteError() {
         let error = CFWriteStreamGetError(writeStream);
         print("Write error: \(error)")
-        if let producer = streamProducer
+        if let producer = self.producer
         {
             producer.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
         }
         close()
-    }
-    
-    func streamClosed() {
-        assert(false, "not yet implemented")
-        //        stream?.connectionClosed()
     }
 }
 
@@ -365,13 +327,13 @@ public class CFStreamProducer : CFStreamBase
  */
 func streamReadCallback(readStream: CFReadStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
 {
-    let consumer = Unmanaged<CFStreamConsumer>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
+    let stream = Unmanaged<CFStream>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
     if eventType == CFStreamEventType.HasBytesAvailable {
-        consumer.hasBytesAvailable()
+        stream.hasBytesAvailable()
     } else if eventType == CFStreamEventType.EndEncountered {
-        consumer.streamClosed()
+        stream.streamClosed()
     } else if eventType == CFStreamEventType.ErrorOccurred {
-        consumer.handleReadError()
+        stream.handleReadError()
     }
 }
 
@@ -380,12 +342,12 @@ func streamReadCallback(readStream: CFReadStream!, eventType: CFStreamEventType,
  */
 func streamWriteCallback(writeStream: CFWriteStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
 {
-    let producer = Unmanaged<CFStreamProducer>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
+    let stream = Unmanaged<CFStream>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
     if eventType == CFStreamEventType.CanAcceptBytes {
-        producer.canAcceptBytes();
+        stream.canAcceptBytes();
     } else if eventType == CFStreamEventType.EndEncountered {
-        producer.streamClosed()
+        stream.streamClosed()
     } else if eventType == CFStreamEventType.ErrorOccurred {
-        producer.handleWriteError()
+        stream.handleWriteError()
     }
 }

@@ -8,73 +8,26 @@
 
 import Foundation
 
-public class FileStream : Stream
+public func FileReader(filePath : String) -> StreamReader
 {
-    var consumer : CFStreamConsumer?
-    var producer : CFStreamProducer?
-    var filePath : String
-    var accessMode : String
+    let fileStream = CFStream(nil)
+    let reader = StreamReader(fileStream)
     
-    public init(path: String, mode: String)
-    {
-        filePath = path
-        accessMode = mode
-        
-        let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
-        if mode == "r" {
-            consumer = CFStreamConsumer(nil)
-            consumer!.setReadStream(CFReadStreamCreateWithFile(kCFAllocatorDefault, fileURL))
-        } else if mode == "w" {
-            producer = CFStreamProducer(nil)
-            producer!.setWriteStream(CFWriteStreamCreateWithFile(kCFAllocatorDefault, fileURL))
-        }
-    }
-
-    public func setReadyToWrite()
-    {
-        producer?.setReadyToWrite()
-    }
-
-    public func setReadyToRead()
-    {
-        consumer?.setReadyToRead()
-    }
-
-    public func close()
-    {
-        consumer?.close()
-        producer?.close()
-    }
-
-    public func ensureRunLoop(block: (() -> Void))
-    {
-    }
-
-    public func dispatchToRunLoop(block: (() -> Void))
-    {
-    }
+    // TODO: this is OSX/CF specific - need a way to make this platform independant
+    let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
+    fileStream.setReadStream(CFReadStreamCreateWithFile(kCFAllocatorDefault, fileURL))
+    fileStream.consumer = reader
+    return reader
 }
 
-public class FileReader : Reader
+public func FileWriter(filePath : String) -> StreamWriter
 {
-    var consumer : CFStreamConsumer?
-    var streamReader : StreamReader
-    var filePath : String
+    let fileStream = CFStream(nil)
+    let writer = StreamWriter(fileStream)
     
-    public init(path: String)
-    {
-        filePath = path
-        let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
-        consumer = CFStreamConsumer(nil)
-        consumer!.setReadStream(CFReadStreamCreateWithFile(kCFAllocatorDefault, fileURL))
-    }
-    
-    public func close()
-    {
-        consumer?.close()
-    }
-    
-    func read(buffer: BufferType, length: Int, callback: IOCallback?)
-    {
-    }
+    // TODO: this is OSX/CF specific - need a way to make this platform independant
+    let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
+    fileStream.setWriteStream(CFWriteStreamCreateWithFile(kCFAllocatorDefault, fileURL))
+    fileStream.producer = writer
+    return writer
 }

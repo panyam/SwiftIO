@@ -9,7 +9,6 @@
 import Foundation
 
 public typealias ConsumerCallback = (buffer: Buffer, error: ErrorType?) -> (finished: Bool, error: ErrorType?)
-public typealias CompletionCallback = (bytesConsumed: Int, error: ErrorType?) -> ()
 
 /**
  * Keeps track of the reed request "call tree" indiciating where and how 
@@ -198,40 +197,51 @@ public class BufferedReader : Reader {
         // if we have data in the buffer, pass that to the consumer
         if dataBuffer.length > 0 {
             // there is data available so give it to the candidate callback
-            if var currFrame = frameStack.last {
-                // TODO: cache this so that we wont have to compute this each time
-                while currFrame.firstFrame != nil {
-                    currFrame = currFrame.firstFrame!
+            if var topFrame = frameStack.last
+            {
+                while topFrame.firstFrame != nil {
+                    topFrame = topFrame.firstFrame!
                 }
-            
-                // before calling the callback, add the current frame onto the stack
-                // this ensures that any calls to consume made from within this frame
-                // will be added to this frame's child list so we preserve the required
-                // depth first ordering.
-                frameStack.append(currFrame)
-                currFrame.callbackCalled = true
-                let (finished, error) = currFrame.callback!(buffer: dataBuffer, error: lastError)
                 
-//                currFrame.bytesConsumed += bytesConsumed
-                currFrame.finished = finished
-                currFrame.error = error
-                
-                while frameStack.last! === currFrame && currFrame !== rootFrame {
-                    // if no new frames were added then this can be removed
-                    currFrame.callbackCalled = false
-                    frameStack.removeLast()
+                // pop off finished frames
+                var finalFrame : ConsumerFrame? = topFrame
+                while finalFrame != nil && finalFrame?.finished == true
+                {
+                    let parentFrame = finalFrame?.parentFrame!
+                    finalFrame?.removeIfFinished()
+                    finalFrame = parentFrame
+                    while finalFrame?.firstFrame != nil
+                    {
+                        finalFrame = finalFrame?.firstFrame
+                    }
+                }
 
-                    // also remove it from the parent
-                    let parentFrame = currFrame.parentFrame!
-                    currFrame.removeIfFinished()
-                    currFrame = parentFrame
-                }
-                
-                // continue consuming bytes for any other consumers we may have left
-                CFRunLoopPerformBlock(CFRunLoopGetCurrent(), kCFRunLoopCommonModes, { () -> Void in
+                if var currFrame = finalFrame {
+                    // before calling the callback, add the current frame onto the stack
+                    // this ensures that any calls to consume made from within this frame
+                    // will be added to this frame's child list so we preserve the required
+                    // depth first ordering.
+                    frameStack.append(currFrame)
+                    currFrame.callbackCalled = true
+                    let (finished, error) = currFrame.callback!(buffer: dataBuffer, error: lastError)
+                    
+                    currFrame.finished = finished
+                    currFrame.error = error
+                    
+                    while frameStack.last! === currFrame && currFrame !== rootFrame {
+                        // if no new frames were added then this can be removed
+                        currFrame.callbackCalled = false
+                        frameStack.removeLast()
+                        
+                        // also remove it from the parent
+                        let parentFrame = currFrame.parentFrame!
+                        currFrame.removeIfFinished()
+                        currFrame = parentFrame
+                    }
+                    
+                    // continue consuming bytes for any other consumers we may have left
                     self.produceBytesForConsumer(nil, lastError: error)
-                })
-                CFRunLoopWakeUp(CFRunLoopGetCurrent())
+                }
             }
         } else {
             // need to do a read
