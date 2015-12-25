@@ -8,6 +8,23 @@
 
 import Foundation
 
+/**
+ * Returns the size of a given file.
+ */
+public func SizeOfFile(filePath: String) -> UInt64? {
+    // TODO: check linux
+    do {
+        let attr : NSDictionary? = try NSFileManager.defaultManager().attributesOfItemAtPath(filePath)
+        
+        if let _attr = attr {
+            return _attr.fileSize();
+        }
+    } catch {
+        print("Error: \(error)")
+    }
+    return nil
+}
+
 public func FileReader(filePath : String) -> StreamReader
 {
     let fileStream = CFStream(nil)

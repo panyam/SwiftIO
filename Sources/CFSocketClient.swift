@@ -15,9 +15,9 @@ public class CFSocketClient : Stream {
     public var producer : StreamProducer?
     var clientSocketNative : CFSocketNativeHandle
     var clientSocket : CFSocket?
-    var transportRunLoop : RunLoop
+    var streamRunLoop : RunLoop
     public var runLoop : RunLoop {
-        return transportRunLoop
+        return streamRunLoop
     }
     var readsAreEdgeTriggered = false
     var writesAreEdgeTriggered = true
@@ -26,7 +26,7 @@ public class CFSocketClient : Stream {
     init(_ clientSock : CFSocketNativeHandle, runLoop: CFRunLoop?) {
         clientSocketNative = clientSock;
         
-        transportRunLoop = CoreFoundationRunLoop(runLoop)
+        streamRunLoop = CoreFoundationRunLoop(runLoop)
 
         initSockets();
         
@@ -36,11 +36,11 @@ public class CFSocketClient : Stream {
     }
 
     var cfRunLoop : CFRunLoop {
-        return (transportRunLoop as! CoreFoundationRunLoop).cfRunLoop
+        return (streamRunLoop as! CoreFoundationRunLoop).cfRunLoop
     }
 
     /**
-     * Called to close the transport.
+     * Called to close the streamRunLoop.
      */
     public func close() {
         CFRunLoopRemoveSource(cfRunLoop, runLoopSource, kCFRunLoopCommonModes)
@@ -55,7 +55,7 @@ public class CFSocketClient : Stream {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if writesAreEdgeTriggered {
-            transportRunLoop.enqueue({ () -> Void in
+            streamRunLoop.enqueue({ () -> Void in
                 self.canAcceptBytes()
             })
         }
@@ -70,14 +70,14 @@ public class CFSocketClient : Stream {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if readsAreEdgeTriggered {
-            transportRunLoop.enqueue { () -> Void in
+            streamRunLoop.enqueue { () -> Void in
                 self.hasBytesAvailable()
             }
         }
     }
     
     /**
-     * Indicates to the transport that no writes are required as yet and to not invoke the write callback
+     * Indicates to the stream that no writes are required as yet and to not invoke the write callback
      * until explicitly required again.
      */
     private func clearReadyToWrite() {
@@ -85,7 +85,7 @@ public class CFSocketClient : Stream {
     }
     
     /**
-     * Indicates to the transport that no writes are required as yet and to not invoke the write callback
+     * Indicates to the stream that no writes are required as yet and to not invoke the write callback
      * until explicitly required again.
      */
     private func clearReadyToRead() {

@@ -57,13 +57,6 @@ public extension Writer {
     }
 }
 
-///**
-// * The object that is the interface to the underlying transport from which
-// * data is read/written to.
-// */
-//public protocol Stream {
-//}
-
 public protocol Stream {
     /**
      * The underlying connection object this is listening to.
@@ -83,7 +76,7 @@ public protocol StreamConsumer {
     func receivedReadError(error: SocketErrorType)
     
     /**
-     * Called by the transport when it can pass data to be processed.
+     * Called by the stream when it can pass data to be processed.
      * Returns a buffer (and length) into which at most length number bytes will be filled.
      */
     func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?
@@ -103,7 +96,7 @@ public protocol StreamProducer {
     func receivedWriteError(error: SocketErrorType)
     
     /**
-     * Called by the transport when it is ready to send data.
+     * Called by the stream when it is ready to send data.
      * Returns the number of bytes of data available.
      */
     func writeDataRequested() -> (buffer: BufferType, length: Int)?
@@ -165,7 +158,7 @@ public class StreamWriter : Writer, StreamProducer
     }
     
     /**
-     * Called by the transport when it is ready to send data.
+     * Called by the stream when it is ready to send data.
      * Returns the number of bytes of data available.
      */
     public func writeDataRequested() -> (buffer: BufferType, length: Int)?
@@ -253,20 +246,6 @@ public class StreamReader : Reader, StreamConsumer {
         }
     }
 }
-
-//
-//public class SimpleStream : Stream {
-//    public var transport : Transport?
-//    public var consumer : StreamConsumer?
-//    public var producer : StreamProducer?
-//    
-//    public init()
-//    {
-//        producer = StreamWriter(self)
-//        consumer = StreamReader(self)
-//    }
-//}
-//
 
 private class IORequest
 {

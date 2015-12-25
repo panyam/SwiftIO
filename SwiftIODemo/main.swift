@@ -33,7 +33,7 @@ class EchoHandler : StreamProducer, StreamConsumer
     }
     
     /**
-     * Called by the transport when it is ready to send data.
+     * Called by the stream when it is ready to send data.
      * Returns the number of bytes of data available.
      */
     func writeDataRequested() -> (buffer: BufferType, length: Int)?
@@ -51,7 +51,7 @@ class EchoHandler : StreamProducer, StreamConsumer
     }
     
     /**
-     * Called by the transport when it can pass data to be processed.
+     * Called by the stream when it can pass data to be processed.
      * Returns a buffer (and length) into which at most length number bytes will be filled.
      */
     func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?

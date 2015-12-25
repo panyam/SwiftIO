@@ -122,8 +122,10 @@ public class CFStream : Stream
             var streamClientContext = CFStreamClientContext(version:0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
             let readEvents = CFStreamEventType.HasBytesAvailable.rawValue | CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
             withUnsafePointer(&streamClientContext) {
-                CFReadStreamSetClient(readStream, readEvents, nil, UnsafeMutablePointer<CFStreamClientContext>($0))
-                CFReadStreamUnscheduleFromRunLoop(readStream, cfRunLoop, kCFRunLoopCommonModes)
+                if readStream != nil {
+                    CFReadStreamSetClient(readStream, readEvents, nil, UnsafeMutablePointer<CFStreamClientContext>($0))
+                    CFReadStreamUnscheduleFromRunLoop(readStream, cfRunLoop, kCFRunLoopCommonModes)
+                }
                 self.readStream = stream
                 CFReadStreamSetClient(readStream, readEvents, streamReadCallback, UnsafeMutablePointer<CFStreamClientContext>($0))
                 CFReadStreamScheduleWithRunLoop(readStream, cfRunLoop, kCFRunLoopCommonModes);
@@ -133,7 +135,7 @@ public class CFStream : Stream
     }
 
     /**
-     * Called to close the transport.
+     * Called to close the stream.
      */
     public func close() {
         CFReadStreamUnscheduleFromRunLoop(readStream, cfRunLoop, kCFRunLoopCommonModes);
@@ -158,7 +160,7 @@ public class CFStream : Stream
     }
     
     /**
-     * Indicates to the transport that no reads are required as yet and to not invoke the read callback
+     * Indicates to the stream that no reads are required as yet and to not invoke the read callback
      * until explicitly required again.
      */
     private func clearReadyToRead() {
@@ -224,8 +226,10 @@ public class CFStream : Stream
             var streamClientContext = CFStreamClientContext(version:0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
             let writeEvents = CFStreamEventType.CanAcceptBytes.rawValue | CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
             withUnsafePointer(&streamClientContext) {
-                CFWriteStreamSetClient(writeStream, writeEvents, nil, UnsafeMutablePointer<CFStreamClientContext>($0))
-                CFWriteStreamUnscheduleFromRunLoop(writeStream, cfRunLoop, kCFRunLoopCommonModes)
+                if writeStream != nil {
+                    CFWriteStreamSetClient(writeStream, writeEvents, nil, UnsafeMutablePointer<CFStreamClientContext>($0))
+                    CFWriteStreamUnscheduleFromRunLoop(writeStream, cfRunLoop, kCFRunLoopCommonModes)
+                }
                 self.writeStream = stream
                 CFWriteStreamSetClient(writeStream, writeEvents, streamWriteCallback, UnsafeMutablePointer<CFStreamClientContext>($0))
                 CFWriteStreamScheduleWithRunLoop(writeStream, cfRunLoop, kCFRunLoopCommonModes);
@@ -252,7 +256,7 @@ public class CFStream : Stream
     }
     
     /**
-     * Indicates to the transport that no writes are required as yet and to not invoke the write callback
+     * Indicates to the stream that no writes are required as yet and to not invoke the write callback
      * until explicitly required again.
      */
     private func clearReadyToWrite() {

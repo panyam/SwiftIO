@@ -7,7 +7,7 @@
 //
 //===----------------------------------------------------------------------===//
 //
-//  This file implements a client transport and runloop on top of CFSocketNativeHandle.
+//  This file implements a server transport and runloop on top of CFSocketNativeHandle.
 //
 //===----------------------------------------------------------------------===//
 
@@ -47,7 +47,7 @@ public class CFSocketServer : StreamServer
     private var serverSocket : CFSocket?
     private var serverSocketV6 : CFSocket?
     public var streamFactory : StreamFactory?
-    private var transportRunLoop : CFRunLoop
+    private var serverRunLoop : CFRunLoop
     
     public init(var _ runLoop : CFRunLoop?)
     {
@@ -55,7 +55,7 @@ public class CFSocketServer : StreamServer
         {
             runLoop = CFRunLoopGetCurrent();
         }
-        transportRunLoop = runLoop!
+        serverRunLoop = runLoop!
     }
     
     public func start() -> ErrorType?
@@ -82,7 +82,7 @@ public class CFSocketServer : StreamServer
 
     func handleConnection(clientSocketNativeHandle : CFSocketNativeHandle)
     {
-        let clientStream = CFSocketClient(clientSocketNativeHandle, runLoop: transportRunLoop)
+        let clientStream = CFSocketClient(clientSocketNativeHandle, runLoop: serverRunLoop)
         streamFactory?.streamStarted(clientStream)
     }
     
@@ -152,7 +152,7 @@ public class CFSocketServer : StreamServer
             let flags = CFSocketGetSocketFlags(outSocket)
             CFSocketSetSocketFlags(outSocket, flags | kCFSocketAutomaticallyReenableAcceptCallBack)
             let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, outSocket, 0)
-            CFRunLoopAddSource(transportRunLoop, socketSource, kCFRunLoopDefaultMode)
+            CFRunLoopAddSource(serverRunLoop, socketSource, kCFRunLoopDefaultMode)
         }
         return (outSocket, error)
     }

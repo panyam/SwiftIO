@@ -8,7 +8,7 @@
 
 import Foundation
 
-let DEFAULT_BUFFER_LENGTH = 8192
+public let DEFAULT_BUFFER_LENGTH = 8192
 
 public class Buffer
 {
