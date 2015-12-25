@@ -1,6 +1,6 @@
 
 //
-//  CFSocketClientTransport.swift
+//  CFSocketClient.swift
 //  swiftli
 //
 //  Created by Sriram Panyam on 12/14/15.
@@ -10,22 +10,23 @@
 import Foundation
 import Darwin
 
-public class CFSocketClientTransport : ClientTransport {
-    var stream : Stream?
+public class CFSocketClient : Stream {
+    public var consumer : StreamConsumer?
+    public var producer : StreamProducer?
     var clientSocketNative : CFSocketNativeHandle
     var clientSocket : CFSocket?
-    var transportRunLoop : CFRunLoop
+    var transportRunLoop : RunLoop
+    public var runLoop : RunLoop {
+        return transportRunLoop
+    }
     var readsAreEdgeTriggered = false
     var writesAreEdgeTriggered = true
     var runLoopSource : CFRunLoopSource?
     
     init(_ clientSock : CFSocketNativeHandle, runLoop: CFRunLoop?) {
         clientSocketNative = clientSock;
-        if let theLoop = runLoop {
-            transportRunLoop = theLoop
-        } else {
-            transportRunLoop = runLoop!
-        }
+        
+        transportRunLoop = CoreFoundationRunLoop(runLoop)
 
         initSockets();
         
@@ -33,30 +34,20 @@ public class CFSocketClientTransport : ClientTransport {
         setReadyToWrite()
         setReadyToRead()
     }
-    
-    /**
-     * Perform an action in run loop corresponding to this client transport.
-     */
-    public func performBlock(block: (() -> Void))
-    {
-        let currRunLoop = CFRunLoopGetCurrent()
-        if transportRunLoop === currRunLoop {
-            block()
-        } else {
-            CFRunLoopPerformBlock(transportRunLoop, kCFRunLoopCommonModes, block)
-            CFRunLoopWakeUp(transportRunLoop)
-        }
+
+    var cfRunLoop : CFRunLoop {
+        return (transportRunLoop as! CoreFoundationRunLoop).cfRunLoop
     }
 
     /**
      * Called to close the transport.
      */
     public func close() {
-        CFRunLoopRemoveSource(transportRunLoop, runLoopSource, kCFRunLoopCommonModes)
+        CFRunLoopRemoveSource(cfRunLoop, runLoopSource, kCFRunLoopCommonModes)
     }
     
     /**
-     * Called to indicate that the stream is ready to write data
+     * Called to indicate that the socket is ready to write data
      */
     public func setReadyToWrite() {
         enableSocketFlag(kCFSocketAutomaticallyReenableWriteCallBack)
@@ -64,14 +55,14 @@ public class CFSocketClientTransport : ClientTransport {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if writesAreEdgeTriggered {
-            self.performBlock({ () -> Void in
+            transportRunLoop.enqueue({ () -> Void in
                 self.canAcceptBytes()
             })
         }
     }
     
     /**
-     * Called to indicate that the stream is ready to read data
+     * Called to indicate that the socket is ready to read data
      */
     public func setReadyToRead() {
         enableSocketFlag(kCFSocketAutomaticallyReenableReadCallBack)
@@ -79,7 +70,9 @@ public class CFSocketClientTransport : ClientTransport {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if readsAreEdgeTriggered {
-            self.performBlock { () -> Void in self.hasBytesAvailable() }
+            transportRunLoop.enqueue { () -> Void in
+                self.hasBytesAvailable()
+            }
         }
     }
     
@@ -111,12 +104,12 @@ public class CFSocketClientTransport : ClientTransport {
                 UnsafePointer<CFSocketContext>($0))
         }
         runLoopSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, clientSocket, 0)
-        CFRunLoopAddSource(transportRunLoop, runLoopSource, kCFRunLoopDefaultMode)
+        CFRunLoopAddSource(cfRunLoop, runLoopSource, kCFRunLoopDefaultMode)
     }
 
     private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
     {
-        let selfAsOpaque = Unmanaged<CFSocketClientTransport>.passUnretained(self).toOpaque()
+        let selfAsOpaque = Unmanaged<CFSocketClient>.passUnretained(self).toOpaque()
         let selfAsVoidPtr = UnsafeMutablePointer<Void>(selfAsOpaque)
         return selfAsVoidPtr
     }
@@ -128,7 +121,7 @@ public class CFSocketClientTransport : ClientTransport {
     
     func hasBytesAvailable() {
         // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
-        if let consumer = stream?.consumer
+        if let consumer = self.consumer
         {
             if let (buffer, length) = consumer.readDataRequested() {
                 if length > 0 {
@@ -150,7 +143,7 @@ public class CFSocketClientTransport : ClientTransport {
     }
     
     func canAcceptBytes() {
-        if let producer = stream?.producer
+        if let producer = self.producer
         {
             if let (buffer, length) = producer.writeDataRequested() {
                 if length > 0 {
@@ -173,7 +166,7 @@ public class CFSocketClientTransport : ClientTransport {
                         // these async triggers dont flood the run loop if the write
                         // stream is backed
                         if writesAreEdgeTriggered {
-                            self.performBlock { () -> Void in
+                            self.runLoop.enqueue { () -> Void in
                                 self.canAcceptBytes()
                             }
                         }
@@ -188,7 +181,7 @@ public class CFSocketClientTransport : ClientTransport {
     }
     
     func handleReadError(errorCode: Int32) {
-        if let consumer = stream?.consumer
+        if let consumer = self.consumer
         {
             consumer.receivedReadError(SocketErrorType(domain: "POSIX", code: errorCode, message: "Socket read error"))
         }
@@ -196,7 +189,7 @@ public class CFSocketClientTransport : ClientTransport {
     }
     
     func handleWriteError(errorCode: Int32) {
-        if let producer = stream?.producer
+        if let producer = self.producer
         {
             producer.receivedWriteError(SocketErrorType(domain: "POSIX", code: errorCode, message: "Socket write error"))
         }
@@ -224,13 +217,13 @@ private func clientSocketCallback(socket: CFSocket!,
 {
     if (callbackType == CFSocketCallBackType.ReadCallBack)
     {
-        let clientTransport = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
+        let clientTransport = Unmanaged<CFSocketClient>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
         clientTransport.hasBytesAvailable()
     }
     else if (callbackType == CFSocketCallBackType.WriteCallBack)
     {
         print("Write callback")
-        let clientTransport = Unmanaged<CFSocketClientTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
+        let clientTransport = Unmanaged<CFSocketClient>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
         clientTransport.canAcceptBytes()
     }
 }

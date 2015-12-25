@@ -8,61 +8,73 @@
 
 import Foundation
 
-public class FileWriter // : Writer
+public class FileStream : Stream
 {
-    var writeStream : CFWriteStream?
+    var consumer : CFStreamConsumer?
+    var producer : CFStreamProducer?
+    var filePath : String
+    var accessMode : String
     
-    public init()
+    public init(path: String, mode: String)
     {
-    }
-    
-    public func open(filePath: String)
-    {
-        let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
-        writeStream = CFWriteStreamCreateWithFile(kCFAllocatorDefault, fileURL)
-        CFWriteStreamOpen(writeStream)
-        if (!CFWriteStreamOpen(writeStream)) {
-            assert(false, "Handle this")
-//            CFStreamError myErr = CFWriteStreamGetError(myWriteStream)
-            // An error has occurred.
-//            if (myErr.domain == kCFStreamErrorDomainPOSIX) {
-//                // Interpret myErr.error as a UNIX errno.
-//            } else if (myErr.domain == kCFStreamErrorDomainMacOSStatus) {
-//                // Interpret myErr.error as a MacOS error code.
-//                OSStatus macError = (OSStatus)myErr.error;
-//                // Check other error domains.
-//            }
-        }
+        filePath = path
+        accessMode = mode
         
-        var streamClientContext = CFStreamClientContext(version:0, info: self.asUnsafeMutableVoid(), retain: nil, release: nil, copyDescription: nil)
-        let writeEvents = CFStreamEventType.CanAcceptBytes.rawValue | CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
-        withUnsafePointer(&streamClientContext) {
-            if (CFWriteStreamSetClient(writeStream, writeEvents, fileWriteCallback, UnsafeMutablePointer<CFStreamClientContext>($0)))
-            {
-                CFWriteStreamScheduleWithRunLoop(writeStream, CFRunLoopGetCurrent(), kCFRunLoopCommonModes);
-            }
+        let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
+        if mode == "r" {
+            consumer = CFStreamConsumer(nil)
+            consumer!.setReadStream(CFReadStreamCreateWithFile(kCFAllocatorDefault, fileURL))
+        } else if mode == "w" {
+            producer = CFStreamProducer(nil)
+            producer!.setWriteStream(CFWriteStreamCreateWithFile(kCFAllocatorDefault, fileURL))
         }
     }
-    
-    private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
+
+    public func setReadyToWrite()
     {
-        let selfAsOpaque = Unmanaged<FileWriter>.passUnretained(self).toOpaque()
-        let selfAsVoidPtr = UnsafeMutablePointer<Void>(selfAsOpaque)
-        return selfAsVoidPtr
+        producer?.setReadyToWrite()
+    }
+
+    public func setReadyToRead()
+    {
+        consumer?.setReadyToRead()
+    }
+
+    public func close()
+    {
+        consumer?.close()
+        producer?.close()
+    }
+
+    public func ensureRunLoop(block: (() -> Void))
+    {
+    }
+
+    public func dispatchToRunLoop(block: (() -> Void))
+    {
     }
 }
 
-/**
- * Callback for the write stream when data is available or errored.
- */
-func fileWriteCallback(writeStream: CFWriteStream!, eventType: CFStreamEventType, info: UnsafeMutablePointer<Void>) -> Void
+public class FileReader : Reader
 {
-//    let fileWriter = Unmanaged<FileWriter>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
-    if eventType == CFStreamEventType.CanAcceptBytes {
-        print("Can accept bytes")
-    } else if eventType == CFStreamEventType.EndEncountered {
-        print("End Encountered")
-    } else if eventType == CFStreamEventType.ErrorOccurred {
-        print("Error Occured")
+    var consumer : CFStreamConsumer?
+    var streamReader : StreamReader
+    var filePath : String
+    
+    public init(path: String)
+    {
+        filePath = path
+        let fileURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault, filePath, CFURLPathStyle.CFURLPOSIXPathStyle, false)
+        consumer = CFStreamConsumer(nil)
+        consumer!.setReadStream(CFReadStreamCreateWithFile(kCFAllocatorDefault, fileURL))
+    }
+    
+    public func close()
+    {
+        consumer?.close()
+    }
+    
+    func read(buffer: BufferType, length: Int, callback: IOCallback?)
+    {
     }
 }

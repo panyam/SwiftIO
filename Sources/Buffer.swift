@@ -8,62 +8,80 @@
 
 import Foundation
 
-public class Buffer {
-    public class Slice
-    {
-        private var parent : Buffer?
-        private var offset: Int = 0
-        private var length: Int = 0
-        
-        public init(parent: Buffer, offset: Int, length: Int)
-        {
-            self.parent = parent
-            self.offset = offset
-            self.length = length
-        }
-    }
+let DEFAULT_BUFFER_LENGTH = 8192
 
-    private var parentSlice : Slice?
-    private var bufferSize : Int
-    private var data = [UInt8]()
-    private var readOffset : Int = 0
-    private var writeOffset : Int = 0
+public class Buffer
+{
+    private var bufferSize : Int = DEFAULT_BUFFER_LENGTH
+    private var buffer : BufferType
+    private var startOffset : Int = 0
+    private var endOffset : Int = 0
+    
+    public var capacity : Int {
+        return bufferSize
+    }
     
     public var length : Int {
         get {
-            let delta = writeOffset - readOffset
-            return delta > 0 ? delta : (capacity + delta)
+            let out = endOffset - startOffset
+            return max(out, 0)
         }
     }
-    
-    public var capacity : Int {
-        get {
-            return data.capacity
-        }
-    }
-
-    public static func alloc(num: Int) -> Buffer
-    {
-        return Buffer(bufferSize: num)
-    }
-    
-    public init (bufferSize: Int)
+        
+    public init(_ bufferSize: Int)
     {
         self.bufferSize = bufferSize
-        self.data.reserveCapacity(bufferSize)
-    }
-
-    /**
-     * Create a buffer as a slice of another buffer.
-     */
-    public init (parent: Buffer, offset: Int, length: Int)
-    {
-        self.parentSlice = Slice(parent: parent, offset: offset, length: length)
-        self.bufferSize = -1
+        self.buffer = BufferType.alloc(bufferSize)
     }
     
-    public func reset() {
-        readOffset = 0
-        writeOffset = 0
+    public convenience init()
+    {
+        self.init(DEFAULT_BUFFER_LENGTH)
+    }
+    
+    public func reset()
+    {
+        startOffset = 0
+        endOffset = 0
+    }
+    
+    /**
+     * Advance the stream position by a given number of bytes.
+     * This will be used by the consumer callback to continually update its status.
+     */
+    func advance(bytesConsumed: Int)
+    {
+        startOffset = min(startOffset + bytesConsumed, endOffset)
+    }
+    
+    /**
+     * Return the buffer of the stream beginning at the current position.
+     */
+    var current : BufferType {
+        return buffer.advancedBy(startOffset)
+    }
+    
+    subscript(index: Int) -> UInt8 {
+        get {
+            return buffer[startOffset + index]
+        }
+    }
+    
+    public func read(reader: Reader, callback: IOCallback?)
+    {
+        if startOffset == endOffset
+        {
+            startOffset = 0
+            endOffset = 0
+        }
+        
+        // TODO: see if needs resizing or moving or circular management
+        assert(bufferSize > endOffset, "Needs some work here!")
+        reader.read(current, length: bufferSize - endOffset) { (length, error) -> () in
+            if error == nil {
+                self.endOffset += length
+            }
+            callback?(length: length, error: error)
+        }
     }
 }

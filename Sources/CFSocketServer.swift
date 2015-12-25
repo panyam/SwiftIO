@@ -28,14 +28,14 @@ private func handleConnectionAccept(socket: CFSocket!,
 {
     if (callbackType == CFSocketCallBackType.AcceptCallBack)
     {
-        let socketTransport = Unmanaged<CFSocketServerTransport>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
+        let socketTransport = Unmanaged<CFSocketServer>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
         let clientSocket = UnsafePointer<CFSocketNativeHandle>(data)
         let clientSocketNativeHandle = clientSocket[0]
         socketTransport.handleConnection(clientSocketNativeHandle);
     }
 }
 
-public class CFSocketServerTransport : ServerTransport
+public class CFSocketServer : StreamServer
 {
     /**
      * Option to ignore a request if header's exceed this length>
@@ -82,15 +82,8 @@ public class CFSocketServerTransport : ServerTransport
 
     func handleConnection(clientSocketNativeHandle : CFSocketNativeHandle)
     {
-        if var stream = streamFactory?.createNewStream()
-        {
-            let clientTransport = CFSocketClientTransport(clientSocketNativeHandle, runLoop: transportRunLoop)
-            stream.transport = clientTransport
-            clientTransport.stream = stream
-            streamFactory?.streamStarted(stream)
-        } else {
-            // TODO: close the socket since no connection delegate was found
-        }
+        let clientStream = CFSocketClient(clientSocketNativeHandle, runLoop: transportRunLoop)
+        streamFactory?.streamStarted(clientStream)
     }
     
     private func initSocket() -> SocketErrorType?
@@ -166,7 +159,7 @@ public class CFSocketServerTransport : ServerTransport
     
     private func asUnsafeMutableVoid() -> UnsafeMutablePointer<Void>
     {
-        let selfAsOpaque = Unmanaged<CFSocketServerTransport>.passUnretained(self).toOpaque()
+        let selfAsOpaque = Unmanaged<CFSocketServer>.passUnretained(self).toOpaque()
         let selfAsVoidPtr = UnsafeMutablePointer<Void>(selfAsOpaque)
         return selfAsVoidPtr
     }

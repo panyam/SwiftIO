@@ -9,12 +9,27 @@
 import Foundation
 
 public typealias BufferType = UnsafeMutablePointer<UInt8>
-public typealias IOCallback = (buffer: BufferType, length: Int, error: ErrorType?) -> ()
+public typealias IOCallback = (length: Int, error: ErrorType?) -> ()
 
-public protocol Closeable {
-    func close()
+public protocol RunLoop
+{
+    /**
+     * Starts the runloop
+     */
+    func start()
+    /**
+     * Stops the runloop
+     */
+    func stop()
+    /**
+     * Ensures that the block is performed within the runloop (if not already happening)
+     */
+    func ensure(block: () -> Void)
+    /**
+     * Enqueues a block to be run on the runloop.
+     */
+    func enqueue(block: () -> Void)
 }
-
 
 /**
  * The Reader protocol is used when an asynchronous read is issued for upto 'length' number
@@ -36,18 +51,27 @@ public protocol Writer {
 public extension Writer {
     public func writeString(string: String, callback: IOCallback?)
     {
-        print(string, terminator: "")
         let nsString = string as NSString
         let length = nsString.lengthOfBytesUsingEncoding(NSUTF8StringEncoding)
         write(UnsafeMutablePointer<UInt8>(nsString.UTF8String), length: length, callback: callback)
     }
 }
 
+///**
+// * The object that is the interface to the underlying transport from which
+// * data is read/written to.
+// */
+//public protocol Stream {
+//}
+
 public protocol Stream {
     /**
      * The underlying connection object this is listening to.
      */
-    var transport : ClientTransport? { get set }
+    func setReadyToWrite()
+    func setReadyToRead()
+    func close()
+    var runLoop : RunLoop { get }
     var consumer : StreamConsumer? { get set }
     var producer : StreamProducer? { get set }
 }
@@ -92,46 +116,25 @@ public protocol StreamProducer {
 
 public protocol StreamFactory {
     /**
-     * Called when a new connection has been created and appropriate data needs
+     * Called when a new stream has been created and appropriate data needs
      * needs to be initialised for this.
      */
-    func createNewStream() -> Stream
     func streamStarted(stream : Stream)
 }
 
-private class IORequest
-{
-    var buffer: BufferType
-    var length: Int
-    var satisfied = 0
-    var callback: IOCallback?
-    init(buffer: BufferType, length: Int, callback: IOCallback?)
-    {
-        self.buffer = buffer
-        self.length = length
-        self.callback = callback
-    }
-    
-    func remaining() -> Int
-    {
-        return length - satisfied
-    }
-    
-    func invokeCallback(err: ErrorType?)
-    {
-        if callback != nil {
-            callback!(buffer: buffer, length: satisfied, error: err)
-        }
-    }
-}
 
+public protocol StreamServer {
+    var streamFactory : StreamFactory? { get set }
+    func start() -> ErrorType?
+    func stop()
+}
 
 /**
  * Implements an async IO writer for a StreamProducer.
- * With a traditional connection, all reads happen via callbacks.  A disadvantage of
- * this is that more and more complex state machines would have to be built and maintained.
- *
- * To over come this, this class provides read methods with async callbacks.
+ * With the traditional callback based writes, the caller has to keep track of how much 
+ * was written and incrementing the buffer pointers accordingly.  This makes it easy
+ * to simply queue a write of a given buffer and forget it.  Ofcourse this requires that
+ * a new buffer is provided for each write.
  */
 public class StreamWriter : Writer, StreamProducer
 {
@@ -148,9 +151,9 @@ public class StreamWriter : Writer, StreamProducer
 
     public func write(buffer: BufferType, length: Int, callback: IOCallback?)
     {
-        stream.transport?.performBlock({ () -> Void in
+        stream.runLoop.ensure({ () -> Void in
             self.writeRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
-            self.stream.transport?.setReadyToWrite()
+            self.stream.setReadyToWrite()
         })
     }
     
@@ -212,9 +215,9 @@ public class StreamReader : Reader, StreamConsumer {
     
     public func read(buffer: BufferType, length: Int, callback: IOCallback?)
     {
-        stream.transport?.performBlock({ () -> Void in
+        stream.runLoop.ensure({ () -> Void in
             self.readRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
-            self.stream.transport?.setReadyToRead()
+            self.stream.setReadyToRead()
         })
     }
     
@@ -251,15 +254,43 @@ public class StreamReader : Reader, StreamConsumer {
     }
 }
 
+//
+//public class SimpleStream : Stream {
+//    public var transport : Transport?
+//    public var consumer : StreamConsumer?
+//    public var producer : StreamProducer?
+//    
+//    public init()
+//    {
+//        producer = StreamWriter(self)
+//        consumer = StreamReader(self)
+//    }
+//}
+//
 
-public class SimpleStream : Stream {
-    public var transport : ClientTransport?
-    public var consumer : StreamConsumer?
-    public var producer : StreamProducer?
-    
-    public init()
+private class IORequest
+{
+    var buffer: BufferType
+    var length: Int
+    var satisfied = 0
+    var callback: IOCallback?
+    init(buffer: BufferType, length: Int, callback: IOCallback?)
     {
-        producer = StreamWriter(self)
-        consumer = StreamReader(self)
+        self.buffer = buffer
+        self.length = length
+        self.callback = callback
+    }
+    
+    func remaining() -> Int
+    {
+        return length - satisfied
+    }
+    
+    func invokeCallback(err: ErrorType?)
+    {
+        if callback != nil {
+            callback!(length: satisfied, error: err)
+        }
     }
 }
+

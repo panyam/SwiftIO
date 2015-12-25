@@ -10,21 +10,19 @@ import SwiftIO
 
 print("Testing....")
 
-let BUFFER_LENGTH = 8192
-
-class EchoConnection : Connection
+class EchoHandler : StreamProducer, StreamConsumer
 {
-    var transport : ClientTransport?
-    private var buffer = UnsafeMutablePointer<UInt8>.alloc(BUFFER_LENGTH)
+    var stream : Stream?
+    private var buffer = UnsafeMutablePointer<UInt8>.alloc(DEFAULT_BUFFER_LENGTH)
     private var length = 0
-    
+
     /**
      * Called when the connection has been closed.
      */
     func connectionClosed()
     {
         print("Good bye!")
-        }
+    }
     
     func receivedReadError(error: SocketErrorType) {
         print("Read Error: \(error)")
@@ -58,7 +56,7 @@ class EchoConnection : Connection
      */
     func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?
     {
-        return (buffer, BUFFER_LENGTH)
+        return (buffer, DEFAULT_BUFFER_LENGTH)
     }
     
     /**
@@ -69,20 +67,21 @@ class EchoConnection : Connection
     func dataReceived(length: Int)
     {
         self.length = length
-        self.transport?.setReadyToWrite()
+        self.stream?.setReadyToWrite()
     }
 }
 
 class EchoFactory : StreamFactory {
-    func createNewStream() -> Connection {
-        return EchoConnection()
-    }
-    func connectionStarted(connection : Connection)
+    func streamStarted(var stream : Stream)
     {
+        let handler = EchoHandler()
+        handler.stream = stream
+        stream.consumer = handler
+        stream.producer = handler
     }
 }
 
-var server = CFSocketServerTransport(nil)
+var server = CFSocketServer(nil)
 server.streamFactory = EchoFactory()
 server.start()
 

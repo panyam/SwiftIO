@@ -10,16 +10,14 @@ import SwiftIO
 
 print("Testing....")
 
-let BUFFER_LENGTH = 8192
-
-class EchoConnection
+class EchoStream
 {
-    var pipe : Pipe
-    private var buffer = UnsafeMutablePointer<UInt8>.alloc(BUFFER_LENGTH)
+    var stream : Stream
+    private var buffer = UnsafeMutablePointer<UInt8>.alloc(DEFAULT_BUFFER_LENGTH)
 
-    init(pipe : Pipe)
+    init(stream : Stream)
     {
-        self.pipe = pipe
+        self.stream = stream
     }
     
     func start()
@@ -29,31 +27,28 @@ class EchoConnection
     
     func readAndEcho()
     {
-        pipe.read(buffer, length: BUFFER_LENGTH) { (buffer, length, error) -> () in
+        let reader = stream.consumer as! StreamReader
+        let writer = stream.producer as! StreamWriter
+        reader.read(buffer, length: DEFAULT_BUFFER_LENGTH) { (length, error) -> () in
             if error == nil {
-                self.pipe.write(buffer, length: length, callback: nil);
+                writer.write(self.buffer, length: length, callback: nil);
                 self.readAndEcho()
             }
         }
     }
 }
 
-var connections = [EchoConnection]()
+var streams = [EchoStream]()
 
 class EchoFactory : StreamFactory {
-    func createNewStream() -> Connection {
-        return SimpleStream()
-    }
-    
-    func connectionStarted(connection: Connection) {
-        let pipe = connection as! Pipe
-        let echoConn = EchoConnection(pipe: pipe)
-        connections.append(echoConn)
+    func streamStarted(stream: Stream) {
+        let echoConn = EchoStream(stream: stream)
+        streams.append(echoConn)
         echoConn.start()
     }
 }
 
-var server = CFSocketServerTransport(nil)
+var server = CFSocketServer(nil)
 server.streamFactory = EchoFactory()
 server.start()
 
