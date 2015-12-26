@@ -40,8 +40,8 @@ class EchoStream
 
 var streams = [EchoStream]()
 
-class EchoFactory : StreamFactory {
-    func streamStarted(stream: Stream) {
+class EchoFactory : StreamHandler {
+    func handleStream(stream: Stream) {
         let echoConn = EchoStream(stream: stream)
         streams.append(echoConn)
         echoConn.start()
@@ -49,7 +49,7 @@ class EchoFactory : StreamFactory {
 }
 
 var server = CFSocketServer(nil)
-server.streamFactory = EchoFactory()
+server.streamHandler = EchoFactory()
 server.start()
 
 while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, false) != CFRunLoopRunResult.Finished {

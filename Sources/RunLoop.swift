@@ -7,3 +7,23 @@
 //
 
 import Foundation
+
+public protocol RunLoop
+{
+    /**
+     * Starts the runloop
+     */
+    func start()
+    /**
+     * Stops the runloop
+     */
+    func stop()
+    /**
+     * Ensures that the block is performed within the runloop (if not already happening)
+     */
+    func ensure(block: () -> Void)
+    /**
+     * Enqueues a block to be run on the runloop.
+     */
+    func enqueue(block: () -> Void)
+}

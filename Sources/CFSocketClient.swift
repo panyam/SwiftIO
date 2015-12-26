@@ -132,6 +132,7 @@ public class CFSocketClient : Stream {
                         handleReadError(errno)
                     } else {
                         // peer has closed so should we finish?
+                        consumer.dataReceived(bytesRead)
                         clearReadyToRead()
                         close()
                     }

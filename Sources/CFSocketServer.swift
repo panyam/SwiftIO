@@ -46,7 +46,7 @@ public class CFSocketServer : StreamServer
     public var serverPortV6 : UInt16 = DEFAULT_SERVER_PORT
     private var serverSocket : CFSocket?
     private var serverSocketV6 : CFSocket?
-    public var streamFactory : StreamFactory?
+    public var streamHandler : StreamHandler?
     private var serverRunLoop : CFRunLoop
     
     public init(var _ runLoop : CFRunLoop?)
@@ -83,7 +83,7 @@ public class CFSocketServer : StreamServer
     func handleConnection(clientSocketNativeHandle : CFSocketNativeHandle)
     {
         let clientStream = CFSocketClient(clientSocketNativeHandle, runLoop: serverRunLoop)
-        streamFactory?.streamStarted(clientStream)
+        streamHandler?.handleStream(clientStream)
     }
     
     private func initSocket() -> SocketErrorType?

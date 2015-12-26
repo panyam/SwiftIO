@@ -186,7 +186,7 @@ public class CFStream : Stream
             }
         }
     }
-    
+
     func hasBytesAvailable() {
         // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
         if let consumer = self.consumer
@@ -199,7 +199,8 @@ public class CFStream : Stream
                     } else if bytesRead < 0 {
                         handleReadError()
                     } else {
-                        // peer has closed so should we finish?
+                        // EOF reached
+                        consumer.dataReceived(bytesRead)
                         clearReadyToRead()
                         close()
                     }
@@ -209,7 +210,7 @@ public class CFStream : Stream
         }
         clearReadyToRead()
     }
-    
+
     func handleReadError() {
         let error = CFReadStreamGetError(readStream);
         print("Read error: \(error)")

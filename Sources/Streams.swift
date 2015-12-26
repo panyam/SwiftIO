@@ -11,26 +11,6 @@ import Foundation
 public typealias BufferType = UnsafeMutablePointer<UInt8>
 public typealias IOCallback = (length: Int, error: ErrorType?) -> ()
 
-public protocol RunLoop
-{
-    /**
-     * Starts the runloop
-     */
-    func start()
-    /**
-     * Stops the runloop
-     */
-    func stop()
-    /**
-     * Ensures that the block is performed within the runloop (if not already happening)
-     */
-    func ensure(block: () -> Void)
-    /**
-     * Enqueues a block to be run on the runloop.
-     */
-    func enqueue(block: () -> Void)
-}
-
 /**
  * The Reader protocol is used when an asynchronous read is issued for upto 'length' number
  * of bytes to be read into the client provided buffer.  Once atleast one byte is read (or
@@ -49,6 +29,11 @@ public protocol Writer {
 }
 
 public extension Writer {
+    public func writeString(string: String)
+    {
+        writeString(string, callback: nil)
+    }
+
     public func writeString(string: String, callback: IOCallback?)
     {
         let nsString = string as NSString
@@ -85,6 +70,7 @@ public protocol StreamConsumer {
      * Called to process data that has been received.
      * It is upto the caller of this interface to consume *all* the data
      * provided.
+     * @param   length  Number of bytes read.  0 if EOF reached.
      */
     func dataReceived(length: Int)
 }
@@ -107,17 +93,17 @@ public protocol StreamProducer {
     func dataWritten(numWritten: Int)
 }
 
-public protocol StreamFactory {
+public protocol StreamHandler {
     /**
      * Called when a new stream has been created and appropriate data needs
      * needs to be initialised for this.
      */
-    func streamStarted(stream : Stream)
+    func handleStream(stream : Stream)
 }
 
 
 public protocol StreamServer {
-    var streamFactory : StreamFactory? { get set }
+    var streamHandler : StreamHandler? { get set }
     func start() -> ErrorType?
     func stop()
 }
@@ -140,6 +126,18 @@ public class StreamWriter : Writer, StreamProducer
     public init(_ stream: Stream)
     {
         self.stream = stream
+    }
+    
+    public func flush(callback: IOCallback?)
+    {
+        stream.runLoop.ensure({ () -> Void in
+            if self.writeRequests.isEmpty
+            {
+                callback?(length: 0, error: nil)
+            } else {
+                self.writeRequests.append(IORequest(buffer: nil, length: 0, callback: callback))
+            }
+        })
     }
 
     public func write(buffer: BufferType, length: Int, callback: IOCallback?)
@@ -182,6 +180,14 @@ public class StreamWriter : Writer, StreamProducer
                 // done so pop it off
                 writeRequests.removeFirst()
                 request.invokeCallback(nil)
+                
+                // remove all flush requests that may appear here
+                while !writeRequests.isEmpty && writeRequests.first?.length == 0
+                {
+                    let ioRequest = writeRequests.first!
+                    writeRequests.removeFirst()
+                    ioRequest.callback?(length: 0, error: nil)
+                }
             }
         }
     }
@@ -235,7 +241,7 @@ public class StreamReader : Reader, StreamConsumer {
      */
     public func dataReceived(length: Int)
     {
-        assert(!readRequests.isEmpty, "Write request queue cannot be empty when we have a data callback")
+        assert(!readRequests.isEmpty, "Read request queue cannot be empty when we have a data callback")
         if let request = readRequests.first {
             request.satisfied += length
             //            if request.remaining() == 0 {

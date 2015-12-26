@@ -216,11 +216,17 @@ public class BufferedReader : Reader {
                     }
                 }
 
+                if finalFrame === rootFrame
+                {
+                    return
+                }
+
                 if var currFrame = finalFrame {
                     // before calling the callback, add the current frame onto the stack
                     // this ensures that any calls to consume made from within this frame
                     // will be added to this frame's child list so we preserve the required
                     // depth first ordering.
+                    let theFrame = currFrame
                     frameStack.append(currFrame)
                     currFrame.callbackCalled = true
                     let (finished, error) = currFrame.callback!(buffer: dataBuffer, error: lastError)
