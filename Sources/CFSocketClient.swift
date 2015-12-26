@@ -43,6 +43,7 @@ public class CFSocketClient : Stream {
      * Called to close the streamRunLoop.
      */
     public func close() {
+        CFSocketInvalidate(clientSocket)
         CFRunLoopRemoveSource(cfRunLoop, runLoopSource, kCFRunLoopCommonModes)
     }
     

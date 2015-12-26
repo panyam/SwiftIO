@@ -186,7 +186,9 @@ public class BufferedReader : Reader {
 //                // advancing the startOffset of any data that may have been read
 //                return
 //            }
-        } else if let error = lastError {
+        }
+        else if let error = lastError
+        {
             unwindWithError(error)
             return
         }
@@ -259,6 +261,25 @@ public class BufferedReader : Reader {
     
     private func unwindWithError(error: ErrorType)
     {
-        assert(false, "Not yet implemented")
-    }
+        if var topFrame = frameStack.last
+        {
+            while topFrame.firstFrame != nil {
+                topFrame = topFrame.firstFrame!
+            }
+            
+            // pop off finished frames
+            var finalFrame : ConsumerFrame? = topFrame
+            while frameStack.count > 1 || frameStack[0].children.isEmpty {
+                let parentFrame = finalFrame?.parentFrame!
+                finalFrame?.callback?(buffer: dataBuffer, error: error)
+                finalFrame?.finished = true
+                finalFrame?.removeIfFinished()
+                finalFrame = parentFrame
+                while finalFrame?.firstFrame != nil
+                {
+                    finalFrame = finalFrame?.firstFrame
+                }
+            }
+        }
+   }
 }
