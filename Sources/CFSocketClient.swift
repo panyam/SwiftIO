@@ -45,6 +45,8 @@ public class CFSocketClient : Stream {
     public func close() {
         CFSocketInvalidate(clientSocket)
         CFRunLoopRemoveSource(cfRunLoop, runLoopSource, kCFRunLoopCommonModes)
+        consumer?.streamClosed()
+        producer?.streamClosed()
     }
     
     /**
@@ -121,7 +123,7 @@ public class CFSocketClient : Stream {
     }
     
     func hasBytesAvailable() {
-        // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
+        // It is safe to call recv; it won’t block because bytes are available.
         if let consumer = self.consumer
         {
             if let (buffer, length) = consumer.readDataRequested() {
@@ -158,7 +160,7 @@ public class CFSocketClient : Stream {
                     } else {
                         print("0 bytes sent")
                     }
-                    
+
                     if numWritten >= 0 && numWritten < length {
                         // only partial data written so dont clear writeable.
                         // if this is the case then for an edge triggered API

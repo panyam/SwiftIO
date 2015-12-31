@@ -146,6 +146,8 @@ public class CFStream : Stream
         {
             CFWriteStreamUnscheduleFromRunLoop(writeStream, cfRunLoop, kCFRunLoopCommonModes);
         }
+        consumer?.streamClosed()
+        producer?.streamClosed()
     }
     
     /**

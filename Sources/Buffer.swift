@@ -12,6 +12,7 @@ public let DEFAULT_BUFFER_LENGTH = 8192
 
 public class Buffer
 {
+    typealias BufferType = UnsafeMutablePointer<UInt8>
     private var bufferSize : Int = DEFAULT_BUFFER_LENGTH
     private var buffer : BufferType
     private var startOffset : Int = 0
@@ -27,7 +28,13 @@ public class Buffer
             return max(out, 0)
         }
     }
-        
+
+    public var isEmpty : Bool {
+        get {
+            return false
+        }
+    }
+    
     public init(_ bufferSize: Int)
     {
         self.bufferSize = bufferSize
@@ -46,12 +53,23 @@ public class Buffer
     }
     
     /**
+     * Copies data from a given buffer into this buffer.
+     * Returns the number of bytes copied.
+     */
+    public func assignFrom(buffer: UnsafePointer<UInt8>, count: Int) -> UInt8
+    {
+        assert(false, "Not yet implemented")
+    }
+    
+    /**
      * Advance the stream position by a given number of bytes.
      * This will be used by the consumer callback to continually update its status.
      */
-    func advance(bytesConsumed: Int)
+    public func advanceBy(bytesConsumed: Int) -> UInt8
     {
+        let out = buffer[startOffset]
         startOffset = min(startOffset + bytesConsumed, endOffset)
+        return out
     }
     
     /**
