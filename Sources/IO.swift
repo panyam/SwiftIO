@@ -20,14 +20,28 @@ public enum IOErrorType : ErrorType
     case Closed
 
     /**
-     * When the end of a read stream has been reached and no more data can be read.
+     * When the end of a stream has been reached and no more data can be read or written.
      */
     case EndReached
     
     /**
-     * When no more data is currently available on a read stream (a read would result in a
+     * When no more data is currently available on a read stream (a read would result in a block until data is available)
      */
     case Unavailable
+    
+    public func equals(error: ErrorType?) -> Bool
+    {
+        if error == nil
+        {
+            return false
+        }
+        
+        if let ioError = error as? IOErrorType
+        {
+            return ioError == self
+        }
+        return false
+    }
 }
 
 /**
@@ -50,20 +64,20 @@ public protocol Reader {
 }
 
 public protocol Writer {
-    func write(buffer: WriteBufferType, length: Int, callback: IOCallback?)
+    func write(buffer: WriteBufferType, length: Int, _ callback: IOCallback?)
 }
 
 public extension Writer {
     public func writeString(string: String)
     {
-        writeString(string, callback: nil)
+        writeString(string, nil)
     }
     
-    public func writeString(string: String, callback: IOCallback?)
+    public func writeString(string: String, _ callback: IOCallback?)
     {
         let nsString = string as NSString
         let length = nsString.lengthOfBytesUsingEncoding(NSUTF8StringEncoding)
-        write(WriteBufferType(nsString.UTF8String), length: length, callback: callback)
+        write(WriteBufferType(nsString.UTF8String), length: length, callback)
     }
 }
 
@@ -99,7 +113,7 @@ public class StreamWriter : Writer, StreamProducer
         })
     }
     
-    public func write(buffer: WriteBufferType, length: Int, callback: IOCallback?)
+    public func write(buffer: WriteBufferType, length: Int, _ callback: IOCallback?)
     {
         stream.runLoop.ensure({ () -> Void in
             self.writeRequests.append(IORequest(buffer: buffer, length: length, callback: callback))

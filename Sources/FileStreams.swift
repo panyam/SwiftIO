@@ -11,13 +11,13 @@ import Foundation
 /**
  * Returns the size of a given file.
  */
-public func SizeOfFile(filePath: String) -> UInt64? {
+public func SizeOfFile(filePath: String) -> UInt? {
     // TODO: check linux
     do {
         let attr : NSDictionary? = try NSFileManager.defaultManager().attributesOfItemAtPath(filePath)
         
         if let _attr = attr {
-            return _attr.fileSize();
+            return UInt(_attr.fileSize());
         }
     } catch {
         print("Error: \(error)")

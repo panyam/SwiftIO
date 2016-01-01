@@ -259,7 +259,8 @@ public class StatefulReader : Reader
                     currFrame.finished = finished
                     currFrame.error = error
                     
-                    while frameStack.last! === currFrame && currFrame !== rootFrame {
+                    while frameStack.last! === currFrame && currFrame !== rootFrame
+                    {
                         // if no new frames were added then this can be removed
                         currFrame.callbackCalled = false
                         frameStack.removeLast()

@@ -69,6 +69,10 @@ public class Buffer
     {
         let out = buffer[startOffset]
         startOffset = min(startOffset + bytesConsumed, endOffset)
+        if startOffset >= bufferSize
+        {
+            startOffset = endOffset
+        }
         return out
     }
     
@@ -95,11 +99,25 @@ public class Buffer
         
         // TODO: see if needs resizing or moving or circular management
         assert(bufferSize > endOffset, "Needs some work here!")
-        reader.read(current, length: bufferSize - endOffset) { (length, error) -> () in
-            if error == nil {
-                self.endOffset += length
+        if startOffset < endOffset
+        {
+            reader.read(current, length: bufferSize - endOffset) { (length, error) -> () in
+                if error == nil {
+                    self.endOffset += length
+                    if self.endOffset >= self.bufferSize
+                    {
+                        self.endOffset = 0
+                    }
+                }
+                callback?(length: length, error: error)
             }
-            callback?(length: length, error: error)
+        } else {
+            reader.read(current, length: startOffset - endOffset) { (length, error) -> () in
+                if error == nil {
+                    self.endOffset += length
+                }
+                callback?(length: length, error: error)
+            }
         }
     }
 }
