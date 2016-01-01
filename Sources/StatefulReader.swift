@@ -167,6 +167,35 @@ public class StatefulReader : Reader
         return readNBytes(8, bigEndian: true, callback: callback)
     }
     
+    public func readUInt8(callback : ((value : UInt8, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(1, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: UInt8(truncatingBitPattern: (value & 0x00000000000000ff)), error: nil)
+        })
+    }
+    
+    public func readUInt16(callback : ((value : UInt16, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(2, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: UInt16(truncatingBitPattern: (value & 0x000000000000ffff)), error: nil)
+        })
+    }
+    
+    public func readUInt32(callback : ((value : UInt32, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(4, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: UInt32(truncatingBitPattern: (value & 0x00000000ffffffff)), error: nil)
+        })
+    }
+    
+    public func readUInt64(callback : ((value : UInt64, error : ErrorType?) -> Void)?)
+    {
+        let origCallback = callback
+        return readNBytes(8, bigEndian: true, callback: { (value, error) -> Void in
+            origCallback?(value: UInt64(value), error: error)
+        })
+    }
+
     /**
      * This is a generic method to ensure that data can be consumed till a certain criteria is
      * met (as decided by the caller) and then any data that is not used after this point is

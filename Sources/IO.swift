@@ -59,8 +59,24 @@ public protocol Reader {
      * the reading getting blocked.
      */
     var bytesAvailable : Int { get }
+    
+    /**
+     * Returns the next byte that can be returned without blocking.  
+     * If no bytes are available then (0, Unavailable) is returned.
+     */
     func read() -> (value: UInt8, error: ErrorType?)
+    
+    /**
+     * Reads upto length number of bytes into the given buffer upon which
+     * the callback is invoked with the number of bytes read (or error).
+     */
     func read(buffer: ReadBufferType, length: Int, callback: IOCallback?)
+
+    /**
+     * Looks ahead enough data so that it can be read with the non-blocking 
+     * synchronous read call above.
+     */
+//    func peek(callback: IOCallback)
 }
 
 public protocol Writer {
