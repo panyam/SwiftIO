@@ -8,7 +8,7 @@
 
 import Foundation
 
-public typealias LengthType = UInt
+public typealias LengthType = Int
 public typealias OffsetType = Int
 public typealias ReadBufferType = UnsafeMutablePointer<UInt8>
 public typealias WriteBufferType = UnsafeMutablePointer<UInt8>
@@ -112,7 +112,7 @@ public class StreamWriter : Writer, StreamProducer
      * The underlying connection object this is listening to.
      */
     private(set) var stream : Stream
-    private var writeRequests = [IORequest<WriteBufferType>]()
+    private var writeRequests = [IORequest]()
     
     public init(_ stream: Stream)
     {
@@ -202,7 +202,7 @@ public class StreamReader : Reader, StreamConsumer {
     /**
      * The underlying connection object this is listening to.
      */
-    private var readRequests = [IORequest<ReadBufferType>]()
+    private var readRequests = [IORequest]()
     private(set) var stream : Stream
     
     public init(_ stream: Stream)
@@ -268,20 +268,20 @@ public class StreamReader : Reader, StreamConsumer {
     }
 }
 
-private class IORequest<BufferType>
+private class IORequest
 {
-    var buffer: BufferType
+    var buffer: ReadBufferType
     var length: LengthType
-    var satisfied = 0
+    var satisfied : LengthType = 0
     var callback: IOCallback?
-    init(buffer: BufferType, length: LengthType, callback: IOCallback?)
+    init(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
         self.buffer = buffer
         self.length = length
         self.callback = callback
     }
     
-    func remaining() -> Int
+    func remaining() -> LengthType
     {
         return length - satisfied
     }
@@ -293,4 +293,3 @@ private class IORequest<BufferType>
         }
     }
 }
-
