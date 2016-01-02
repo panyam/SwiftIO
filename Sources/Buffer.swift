@@ -13,16 +13,16 @@ public let DEFAULT_BUFFER_LENGTH = 8192
 public class Buffer
 {
     typealias BufferType = UnsafeMutablePointer<UInt8>
-    private var bufferSize : Int = DEFAULT_BUFFER_LENGTH
+    private var bufferSize : LengthType = DEFAULT_BUFFER_LENGTH
     private var buffer : BufferType
-    private var startOffset : Int = 0
-    private var endOffset : Int = 0
+    private var startOffset : OffsetType = 0
+    private var endOffset : OffsetType = 0
     
-    public var capacity : Int {
+    public var capacity : LengthType {
         return bufferSize
     }
     
-    public var length : Int {
+    public var length: LengthType {
         get {
             let out = endOffset - startOffset
             return max(out, 0)
@@ -35,7 +35,7 @@ public class Buffer
         }
     }
     
-    public init(_ bufferSize: Int)
+    public init(_ bufferSize: LengthType)
     {
         self.bufferSize = bufferSize
         self.buffer = BufferType.alloc(bufferSize)
@@ -56,16 +56,16 @@ public class Buffer
      * Copies data from a given buffer into this buffer.
      * Returns the number of bytes copied.
      */
-    public func assignFrom(buffer: UnsafePointer<UInt8>, count: Int) -> UInt8
-    {
-        assert(false, "Not yet implemented")
-    }
+//    public func assignFrom(buffer: UnsafePointer<UInt8>, count: LengthType) -> UInt8
+//    {
+//        assert(false, "Not yet implemented")
+//    }
     
     /**
      * Advance the stream position by a given number of bytes.
      * This will be used by the consumer callback to continually update its status.
      */
-    public func advanceBy(bytesConsumed: Int) -> UInt8
+    public func advanceBy(bytesConsumed: LengthType) -> UInt8
     {
         let out = buffer[startOffset]
         startOffset = min(startOffset + bytesConsumed, endOffset)
@@ -83,7 +83,7 @@ public class Buffer
         return buffer.advancedBy(startOffset)
     }
     
-    subscript(index: Int) -> UInt8 {
+    subscript(index: OffsetType) -> UInt8 {
         get {
             return buffer[startOffset + index]
         }
@@ -101,7 +101,7 @@ public class Buffer
         assert(bufferSize > endOffset, "Needs some work here!")
         if startOffset < endOffset
         {
-            reader.read(current, length: bufferSize - endOffset) { (length, error) -> () in
+            reader.read(current, length: bufferSize - endOffset) { (length, error) in
                 if error == nil {
                     self.endOffset += length
                     if self.endOffset >= self.bufferSize
@@ -112,7 +112,7 @@ public class Buffer
                 callback?(length: length, error: error)
             }
         } else {
-            reader.read(current, length: startOffset - endOffset) { (length, error) -> () in
+            reader.read(current, length: startOffset - endOffset) { (length, error) in
                 if error == nil {
                     self.endOffset += length
                 }

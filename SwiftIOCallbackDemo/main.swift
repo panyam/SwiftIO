@@ -29,7 +29,7 @@ class EchoStream
     {
         let reader = stream.consumer as! StreamReader
         let writer = stream.producer as! StreamWriter
-        reader.read(buffer, length: DEFAULT_BUFFER_LENGTH) { (length, error) -> () in
+        reader.read(buffer, length: DEFAULT_BUFFER_LENGTH) { (length, error) in
             if error == nil {
                 writer.write(self.buffer, length: length, callback: nil);
                 self.readAndEcho()

@@ -36,7 +36,7 @@ class EchoHandler : StreamProducer, StreamConsumer
      * Called by the stream when it is ready to send data.
      * Returns the number of bytes of data available.
      */
-    func writeDataRequested() -> (buffer: BufferType, length: Int)?
+    func writeDataRequested() -> (buffer: BufferType, length: LengthType)?
     {
         print("Write data requested...");
         return (buffer, length)
@@ -45,7 +45,7 @@ class EchoHandler : StreamProducer, StreamConsumer
     /**
      * Called into indicate numWritten bytes have been written.
      */
-    func dataWritten(numWritten: Int)
+    func dataWritten(numWritten: LengthType)
     {
         length -= numWritten
     }
@@ -54,7 +54,7 @@ class EchoHandler : StreamProducer, StreamConsumer
      * Called by the stream when it can pass data to be processed.
      * Returns a buffer (and length) into which at most length number bytes will be filled.
      */
-    func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?
+    func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: LengthType)?
     {
         return (buffer, DEFAULT_BUFFER_LENGTH)
     }
@@ -64,7 +64,7 @@ class EchoHandler : StreamProducer, StreamConsumer
      * It is upto the caller of this interface to consume *all* the data
      * provided.
      */
-    func dataReceived(length: Int)
+    func dataReceived(length: LengthType)
     {
         self.length = length
         self.stream?.setReadyToWrite()

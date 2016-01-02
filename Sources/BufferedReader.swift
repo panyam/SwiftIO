@@ -11,9 +11,9 @@ import Foundation
 public class BufferedReader : Reader {
     private var reader : Reader
     private var dataBuffer : Buffer
-    private var bufferSize : Int = 0
+    private var bufferSize : LengthType = 0
     
-    public init (_ reader: Reader, bufferSize: Int)
+    public init (_ reader: Reader, bufferSize: LengthType)
     {
         self.reader = reader
         self.bufferSize = bufferSize
@@ -25,7 +25,7 @@ public class BufferedReader : Reader {
         self.init(reader, bufferSize: DEFAULT_BUFFER_LENGTH)
     }
     
-    public var bytesAvailable : Int {
+    public var bytesAvailable : LengthType {
         get {
             return dataBuffer.length
         }
@@ -43,7 +43,7 @@ public class BufferedReader : Reader {
     /**
      * Initiate a read for at least one byte.
      */
-    public func read(buffer: ReadBufferType, length: Int, callback: IOCallback?)
+    public func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
         let readBuffer = buffer
         let readLength = length
@@ -56,7 +56,7 @@ public class BufferedReader : Reader {
             
             callback?(length: min(readLength, length), error: nil)
         } else {
-            dataBuffer.read(reader, callback: { (length, error) -> () in
+            dataBuffer.read(reader, callback: { (length, error) in
                 callback?(length: min(readLength, self.dataBuffer.length), error: error)
             })
         }

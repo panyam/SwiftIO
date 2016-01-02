@@ -8,9 +8,11 @@
 
 import Foundation
 
+public typealias LengthType = UInt
+public typealias OffsetType = Int
 public typealias ReadBufferType = UnsafeMutablePointer<UInt8>
 public typealias WriteBufferType = UnsafeMutablePointer<UInt8>
-public typealias IOCallback = (length: Int, error: ErrorType?) -> ()
+public typealias IOCallback = (length: LengthType, error: ErrorType?) -> Void
 
 public enum IOErrorType : ErrorType
 {
@@ -58,7 +60,7 @@ public protocol Reader {
      * Returns the number of bytes available that can be read without the
      * the reading getting blocked.
      */
-    var bytesAvailable : Int { get }
+    var bytesAvailable : LengthType { get }
     
     /**
      * Returns the next byte that can be returned without blocking.  
@@ -70,7 +72,7 @@ public protocol Reader {
      * Reads upto length number of bytes into the given buffer upon which
      * the callback is invoked with the number of bytes read (or error).
      */
-    func read(buffer: ReadBufferType, length: Int, callback: IOCallback?)
+    func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
 
     /**
      * Looks ahead enough data so that it can be read with the non-blocking 
@@ -80,7 +82,7 @@ public protocol Reader {
 }
 
 public protocol Writer {
-    func write(buffer: WriteBufferType, length: Int, _ callback: IOCallback?)
+    func write(buffer: WriteBufferType, length: LengthType, _ callback: IOCallback?)
 }
 
 public extension Writer {
@@ -93,7 +95,7 @@ public extension Writer {
     {
         let nsString = string as NSString
         let length = nsString.lengthOfBytesUsingEncoding(NSUTF8StringEncoding)
-        write(WriteBufferType(nsString.UTF8String), length: length, callback)
+        write(WriteBufferType(nsString.UTF8String), length: LengthType(length), callback)
     }
 }
 
@@ -129,7 +131,7 @@ public class StreamWriter : Writer, StreamProducer
         })
     }
     
-    public func write(buffer: WriteBufferType, length: Int, _ callback: IOCallback?)
+    public func write(buffer: WriteBufferType, length: LengthType, _ callback: IOCallback?)
     {
         stream.runLoop.ensure({ () -> Void in
             self.writeRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
@@ -148,7 +150,7 @@ public class StreamWriter : Writer, StreamProducer
      * Called by the stream when it is ready to send data.
      * Returns the number of bytes of data available.
      */
-    public func writeDataRequested() -> (buffer: WriteBufferType, length: Int)?
+    public func writeDataRequested() -> (buffer: WriteBufferType, length: LengthType)?
     {
         if let request = writeRequests.first {
             return (request.buffer.advancedBy(request.satisfied), request.remaining())
@@ -159,7 +161,7 @@ public class StreamWriter : Writer, StreamProducer
     /**
      * Called into indicate numWritten bytes have been written.
      */
-    public func dataWritten(numWritten: Int)
+    public func dataWritten(numWritten: LengthType)
     {
         assert(!writeRequests.isEmpty, "Write request queue cannot be empty when we have a data callback")
         if let request = writeRequests.first {
@@ -208,7 +210,7 @@ public class StreamReader : Reader, StreamConsumer {
         self.stream = stream
     }
     
-    public var bytesAvailable : Int {
+    public var bytesAvailable : LengthType {
         get {
             return 0
         }
@@ -218,7 +220,7 @@ public class StreamReader : Reader, StreamConsumer {
         return (0, IOErrorType.Unavailable)
     }
     
-    public func read(buffer: ReadBufferType, length: Int, callback: IOCallback?)
+    public func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
         stream.runLoop.ensure({ () -> Void in
             self.readRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
@@ -233,7 +235,7 @@ public class StreamReader : Reader, StreamConsumer {
         readRequests.removeAll()
     }
     
-    public func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)? {
+    public func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: LengthType)? {
         if let request = readRequests.first {
             return (request.buffer.advancedBy(request.satisfied), request.remaining())
         }
@@ -252,7 +254,7 @@ public class StreamReader : Reader, StreamConsumer {
      * It is upto the caller of this interface to consume *all* the data
      * provided.
      */
-    public func dataReceived(length: Int)
+    public func dataReceived(length: LengthType)
     {
         assert(!readRequests.isEmpty, "Read request queue cannot be empty when we have a data callback")
         if let request = readRequests.first {
@@ -269,10 +271,10 @@ public class StreamReader : Reader, StreamConsumer {
 private class IORequest<BufferType>
 {
     var buffer: BufferType
-    var length: Int
+    var length: LengthType
     var satisfied = 0
     var callback: IOCallback?
-    init(buffer: BufferType, length: Int, callback: IOCallback?)
+    init(buffer: BufferType, length: LengthType, callback: IOCallback?)
     {
         self.buffer = buffer
         self.length = length

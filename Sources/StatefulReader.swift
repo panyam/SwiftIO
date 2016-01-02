@@ -17,15 +17,10 @@ public class StatefulReader : Reader
     private var rootFrame = ConsumerFrame(nil, nil)
     private var frameStack = [ConsumerFrame]()
     
-    public init (_ reader: Reader, bufferSize: Int)
+    public init (_ reader: Reader)
     {
         self.reader = reader
         frameStack.append(rootFrame)
-    }
-    
-    public convenience init (_ reader: Reader)
-    {
-        self.init(reader, bufferSize: DEFAULT_BUFFER_LENGTH)
     }
     
     public var bytesAvailable : Int {
@@ -41,7 +36,7 @@ public class StatefulReader : Reader
     /**
      * Initiate a read for at least one byte.
      */
-    public func read(buffer: ReadBufferType, length: Int, callback: IOCallback?)
+    public func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
         let readBuffer = buffer
         let readLength = length
@@ -61,7 +56,7 @@ public class StatefulReader : Reader
     /**
      * Initiate a read for a given size and waits till all the bytes have been returned.
      */
-    public func readFully(buffer: ReadBufferType, length: Int, callback: IOCallback?)
+    public func readFully(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
         let readBuffer = buffer
         var totalConsumed = 0
@@ -88,7 +83,7 @@ public class StatefulReader : Reader
     /**
      * Read till a particular character is encountered (not including the delimiter).
      */
-    public func readTillChar(delimiter: UInt8, callback : ((str : String, error: ErrorType?) -> ())?)
+    public func readTillChar(delimiter: UInt8, callback : ((str : String, error: ErrorType?) -> Void)?)
     {
         var returnedString = ""
         consume({ (reader) -> (finished: Bool, error: ErrorType?) in

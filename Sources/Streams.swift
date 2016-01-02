@@ -30,7 +30,7 @@ public protocol StreamConsumer {
      * Called by the stream when it can pass data to be processed.
      * Returns a buffer (and length) into which at most length number bytes will be filled.
      */
-    func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: Int)?
+    func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: LengthType)?
     
     /**
      * Called to process data that has been received.
@@ -38,7 +38,7 @@ public protocol StreamConsumer {
      * provided.
      * @param   length  Number of bytes read.  0 if EOF reached.
      */
-    func dataReceived(length: Int)
+    func dataReceived(length: LengthType)
     
     /**
      * Called when the parent stream is closed.
@@ -56,12 +56,12 @@ public protocol StreamProducer {
      * Called by the stream when it is ready to send data.
      * Returns the number of bytes of data available.
      */
-    func writeDataRequested() -> (buffer: WriteBufferType, length: Int)?
+    func writeDataRequested() -> (buffer: WriteBufferType, length: LengthType)?
     
     /**
      * Called into indicate numWritten bytes have been written.
      */
-    func dataWritten(numWritten: Int)
+    func dataWritten(numWritten: LengthType)
     
     /**
      * Called when the parent stream is closed.
