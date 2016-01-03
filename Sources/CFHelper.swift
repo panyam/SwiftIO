@@ -19,6 +19,12 @@ public func CurrentRunLoop() -> RunLoop
     return CoreFoundationRunLoop.defaultInstance
 }
 
+private func cfRunLoopTimerCallback(timer: CFRunLoopTimer!, data: UnsafeMutablePointer<Void>)
+{
+    let blockHolder = Unmanaged<CoreFoundationRunLoop.BlockHolder>.fromOpaque(COpaquePointer(data)).takeUnretainedValue()
+    blockHolder.block()
+}
+
 public class CoreFoundationRunLoop : RunLoop
 {
     static let defaultInstance = CoreFoundationRunLoop(CFRunLoopGetMain())
@@ -86,6 +92,33 @@ public class CoreFoundationRunLoop : RunLoop
     {
         CFRunLoopPerformBlock(cfRunLoop, kCFRunLoopCommonModes, block)
         CFRunLoopWakeUp(cfRunLoop)
+    }
+
+    /**
+     * Enqueues a task to be performed a particular timeout.
+     */
+    private class BlockHolder
+    {
+        var block: Void -> Void
+        init(_ block: Void -> Void)
+        {
+            self.block = block
+        }
+    }
+
+    public func enqueueAfter(timeout: CFAbsoluteTime, block: Void -> Void)
+    {
+        let interval = CFAbsoluteTimeGetCurrent() + timeout
+        let blockHolder = BlockHolder(block)
+        let blockAsOpaque = Unmanaged<BlockHolder>.passUnretained(blockHolder).toOpaque()
+        let blockAsVoidPtr = UnsafeMutablePointer<Void>(blockAsOpaque)
+        var timerContext = CFRunLoopTimerContext(version: 0, info: blockAsVoidPtr, retain: nil, release: nil, copyDescription: nil)
+        withUnsafePointer(&timerContext) {
+            let timer = CFRunLoopTimerCreate(kCFAllocatorDefault, interval, 0, 0, 0,
+                cfRunLoopTimerCallback,
+                UnsafeMutablePointer<CFRunLoopTimerContext>($0))
+            CFRunLoopAddTimer(cfRunLoop, timer, kCFRunLoopCommonModes)
+        }
     }
 }
 
@@ -161,7 +194,7 @@ public class CFStream : Stream
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if readsAreEdgeTriggered {
-            self.runLoop.enqueue { () -> Void in
+            self.runLoop.enqueue {
                 self.hasBytesAvailable()
             }
         }
@@ -258,7 +291,7 @@ public class CFStream : Stream
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if writesAreEdgeTriggered {
-            self.runLoop.enqueue { () -> Void in
+            self.runLoop.enqueue {
                 self.canAcceptBytes()
             }
         }
@@ -310,7 +343,7 @@ public class CFStream : Stream
                         // these async triggers dont flood the run loop if the write
                         // stream is backed
                         if writesAreEdgeTriggered {
-                            self.runLoop.enqueue { () -> Void in
+                            self.runLoop.enqueue {
                                 self.canAcceptBytes()
                             }
                         }

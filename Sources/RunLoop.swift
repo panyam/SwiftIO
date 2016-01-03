@@ -26,4 +26,8 @@ public protocol RunLoop
      * Enqueues a block to be run on the runloop.
      */
     func enqueue(block: () -> Void)
+    /**
+     * Enqueues a block to performed after a certain timeout in the future
+     */
+    func enqueueAfter(timeout: CFAbsoluteTime, block: Void -> Void)
 }

@@ -17,6 +17,10 @@ public class StatefulReader : Reader
     private var rootFrame = ConsumerFrame(nil, nil)
     private var frameStack = [ConsumerFrame]()
     
+    public var stream : Stream {
+        return reader.stream
+    }
+    
     public init (_ reader: Reader)
     {
         self.reader = reader
@@ -24,9 +28,7 @@ public class StatefulReader : Reader
     }
     
     public var bytesAvailable : Int {
-        get {
-            return reader.bytesAvailable
-        }
+        return reader.bytesAvailable
     }
     
     public func read() -> (value: UInt8, error: ErrorType?) {
@@ -186,7 +188,7 @@ public class StatefulReader : Reader
     public func readUInt64(callback : ((value : UInt64, error : ErrorType?) -> Void)?)
     {
         let origCallback = callback
-        return readNBytes(8, bigEndian: true, callback: { (value, error) -> Void in
+        return readNBytes(8, bigEndian: true, callback: { (value, error) in
             origCallback?(value: UInt64(value), error: error)
         })
     }
@@ -301,9 +303,9 @@ public class StatefulReader : Reader
             }
         } else {
             // need to do a read
-            reader.read(nil, length: 1, callback: { (length, error) -> () in
+            reader.read(nil, length: 1) { (length, error) -> () in
                 self.produceBytesForConsumer(nil, onError: nil, lastError: error)
-            })
+            }
         }
     }
     

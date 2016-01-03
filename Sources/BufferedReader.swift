@@ -25,10 +25,12 @@ public class BufferedReader : Reader {
         self.init(reader, bufferSize: DEFAULT_BUFFER_LENGTH)
     }
     
+    public var stream : Stream {
+        return reader.stream
+    }
+
     public var bytesAvailable : LengthType {
-        get {
-            return dataBuffer.length
-        }
+        return dataBuffer.length
     }
     
     public func read() -> (value: UInt8, error: ErrorType?) {
@@ -36,7 +38,7 @@ public class BufferedReader : Reader {
         {
             return (0, IOErrorType.Unavailable)
         } else {
-            return (dataBuffer.advanceBy(0), nil)
+            return (dataBuffer.advanceBy(1), nil)
         }
     }
 
@@ -56,9 +58,9 @@ public class BufferedReader : Reader {
             
             callback?(length: min(readLength, length), error: nil)
         } else {
-            dataBuffer.read(reader, callback: { (length, error) in
+            dataBuffer.read(reader) { (length, error) in
                 callback?(length: min(readLength, self.dataBuffer.length), error: error)
-            })
+            }
         }
     }
 }

@@ -58,9 +58,9 @@ public class CFSocketClient : Stream {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if writesAreEdgeTriggered {
-            streamRunLoop.enqueue({ () -> Void in
+            streamRunLoop.enqueue {
                 self.canAcceptBytes()
-            })
+            }
         }
     }
     
@@ -73,7 +73,7 @@ public class CFSocketClient : Stream {
         // It is possible that a client can call this as many as
         // time as it needs greedily
         if readsAreEdgeTriggered {
-            streamRunLoop.enqueue { () -> Void in
+            streamRunLoop.enqueue {
                 self.hasBytesAvailable()
             }
         }
@@ -170,7 +170,7 @@ public class CFSocketClient : Stream {
                         // these async triggers dont flood the run loop if the write
                         // stream is backed
                         if writesAreEdgeTriggered {
-                            self.runLoop.enqueue { () -> Void in
+                            self.runLoop.enqueue {
                                 self.canAcceptBytes()
                             }
                         }
@@ -226,7 +226,6 @@ private func clientSocketCallback(socket: CFSocket!,
     }
     else if (callbackType == CFSocketCallBackType.WriteCallBack)
     {
-        print("Write callback")
         let clientTransport = Unmanaged<CFSocketClient>.fromOpaque(COpaquePointer(info)).takeUnretainedValue()
         clientTransport.canAcceptBytes()
     }

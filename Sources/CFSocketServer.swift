@@ -149,6 +149,11 @@ public class CFSocketServer : StreamServer
             }
         }
         if error == nil {
+            var sock_opt_on = Int32(1)
+            let nativeSocket = CFSocketGetNative(outSocket)
+            setsockopt(nativeSocket, SOL_SOCKET, SO_REUSEADDR, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
+            setsockopt(nativeSocket, SOL_SOCKET, SO_REUSEPORT, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
+            
             let flags = CFSocketGetSocketFlags(outSocket)
             CFSocketSetSocketFlags(outSocket, flags | kCFSocketAutomaticallyReenableAcceptCallBack)
             let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, outSocket, 0)
