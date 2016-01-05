@@ -21,7 +21,7 @@ public func CurrentRunLoop() -> RunLoop
 
 private func cfRunLoopTimerCallback(timer: CFRunLoopTimer!, data: UnsafeMutablePointer<Void>)
 {
-    let blockHolder = Unmanaged<CoreFoundationRunLoop.BlockHolder>.fromOpaque(COpaquePointer(data)).takeUnretainedValue()
+    let blockHolder = Unmanaged<CoreFoundationRunLoop.BlockHolder>.fromOpaque(COpaquePointer(data)).takeRetainedValue()
     blockHolder.block()
 }
 
@@ -110,7 +110,7 @@ public class CoreFoundationRunLoop : RunLoop
     {
         let interval = CFAbsoluteTimeGetCurrent() + timeout
         let blockHolder = BlockHolder(block)
-        let blockAsOpaque = Unmanaged<BlockHolder>.passUnretained(blockHolder).toOpaque()
+        let blockAsOpaque = Unmanaged<BlockHolder>.passRetained(blockHolder).toOpaque()
         let blockAsVoidPtr = UnsafeMutablePointer<Void>(blockAsOpaque)
         var timerContext = CFRunLoopTimerContext(version: 0, info: blockAsVoidPtr, retain: nil, release: nil, copyDescription: nil)
         withUnsafePointer(&timerContext) {

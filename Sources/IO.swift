@@ -13,6 +13,8 @@ public typealias OffsetType = LengthType
 public typealias ReadBufferType = UnsafeMutablePointer<UInt8>
 public typealias WriteBufferType = UnsafeMutablePointer<UInt8>
 public typealias IOCallback = (length: LengthType, error: ErrorType?) -> Void
+public typealias ResultCallback = (value : AnyObject?, error: ErrorType?) -> Void
+public typealias CompletionCallback = (error: ErrorType?) -> Void
 
 public enum IOErrorType : ErrorType
 {
@@ -30,18 +32,4 @@ public enum IOErrorType : ErrorType
      * When no more data is currently available on a read stream (a read would result in a block until data is available)
      */
     case Unavailable
-    
-    public func equals(error: ErrorType?) -> Bool
-    {
-        if error == nil
-        {
-            return false
-        }
-        
-        if let ioError = error as? IOErrorType
-        {
-            return ioError == self
-        }
-        return false
-    }
 }

@@ -26,9 +26,9 @@ public protocol Reader {
     
     /**
      * Returns the number of bytes available that can be read without the
-     * the reading getting blocked.
+     * the read getting blocked.
      */
-    var bytesAvailable : LengthType { get }
+    var bytesReadable : LengthType { get }
     
     /**
      * Returns the next byte that can be returned without blocking.

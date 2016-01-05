@@ -29,7 +29,7 @@ public class BufferedReader : Reader {
         return reader.stream
     }
 
-    public var bytesAvailable : LengthType {
+    public var bytesReadable : LengthType {
         return dataBuffer.length
     }
     
@@ -53,10 +53,15 @@ public class BufferedReader : Reader {
         if dataBuffer.length > 0
         {
             // then copy it
-            readBuffer.assignFrom(dataBuffer.current, count: min(readLength, length))
-            dataBuffer.advanceBy(min(readLength, length))
-            
-            callback?(length: min(readLength, length), error: nil)
+            if buffer != nil
+            {
+                readBuffer.assignFrom(dataBuffer.current, count: min(readLength, length))
+                dataBuffer.advanceBy(min(readLength, length))
+                callback?(length: min(readLength, length), error: nil)
+            } else {
+                // a nil buffer was passed so just return 0 to tell the caller we have data
+                callback?(length: 0, error: nil)
+            }
         } else {
             dataBuffer.read(reader) { (length, error) in
                 callback?(length: min(readLength, self.dataBuffer.length), error: error)

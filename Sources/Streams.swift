@@ -90,7 +90,7 @@ public protocol StreamServer {
  * With the traditional callback based writes, the caller has to keep track of how much
  * was written and incrementing the buffer pointers accordingly.  This makes it easy
  * to simply queue a write of a given buffer and forget it.  Ofcourse this requires that
- * a new buffer is provided for each write.
+ * the caller be willing to transfer ownership of the buffer to writer.
  */
 public class StreamWriter : Writer, StreamProducer
 {
@@ -107,6 +107,17 @@ public class StreamWriter : Writer, StreamProducer
     public init(_ stream: Stream)
     {
         theStream = stream
+    }
+    
+    public func flush(callback: CompletionCallback?)
+    {
+        assert(false, "not yet implemented")
+    }
+    
+    public func write(value: UInt8, _ callback: CompletionCallback?)
+    {
+        assert(false, "not yet implemented")
+//        self.write(buffer, length: 1, _ callback: callback)
     }
     
     public func write(buffer: WriteBufferType, length: LengthType, _ callback: IOCallback?)
@@ -195,7 +206,7 @@ public class StreamReader : Reader, StreamConsumer {
         theStream = stream
     }
     
-    public var bytesAvailable : LengthType {
+    public var bytesReadable : LengthType {
         return 0
     }
     
@@ -264,10 +275,7 @@ private class IORequest
         self.callback = callback
     }
     
-    var remaining : LengthType
-        {
-            return length - satisfied
-    }
+    var remaining : LengthType { return length - satisfied }
     
     func invokeCallback(err: ErrorType?)
     {

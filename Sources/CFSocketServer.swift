@@ -112,6 +112,11 @@ public class CFSocketServer : StreamServer
                 outSocket = CFSocketCreate(kCFAllocatorDefault, PF_INET, 0, 0, 2, handleConnectionAccept, UnsafePointer<CFSocketContext>($0));
             }
             
+            var sock_opt_on = Int32(1)
+            let nativeSocket = CFSocketGetNative(outSocket)
+            setsockopt(nativeSocket, SOL_SOCKET, SO_REUSEADDR, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
+            setsockopt(nativeSocket, SOL_SOCKET, SO_REUSEPORT, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
+            
             var sincfd : CFData?
             if isV6 {
                 var sin6 = sockaddr_in6();
@@ -141,19 +146,17 @@ public class CFSocketServer : StreamServer
                         sin_len);
                 }
             }
+            
             let err = CFSocketSetAddress(outSocket, sincfd);
             if err != CFSocketError.Success {
                 error = SocketErrorType(message: "Unable to set address on socket")
                 let errstr : String? =  String.fromCString(strerror(errno));
                 NSLog ("Socket Set Address Error: \(err.rawValue), \(errno), \(errstr)")
+                CFSocketInvalidate(outSocket)
+                exit(1)
             }
         }
         if error == nil {
-            var sock_opt_on = Int32(1)
-            let nativeSocket = CFSocketGetNative(outSocket)
-            setsockopt(nativeSocket, SOL_SOCKET, SO_REUSEADDR, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
-            setsockopt(nativeSocket, SOL_SOCKET, SO_REUSEPORT, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
-            
             let flags = CFSocketGetSocketFlags(outSocket)
             CFSocketSetSocketFlags(outSocket, flags | kCFSocketAutomaticallyReenableAcceptCallBack)
             let socketSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, outSocket, 0)

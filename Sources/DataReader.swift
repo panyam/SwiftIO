@@ -1,5 +1,5 @@
 //
-//  StatefulReader.swift
+//  DataReader.swift
 //  SwiftIO
 //
 //  Created by Sriram Panyam on 12/30/15.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class StatefulReader : Reader
+public class DataReader
 {
     public typealias ConsumerCallback = (reader: Reader) -> (finished: Bool, error: ErrorType?)
     public typealias ErrorCallback = (error : ErrorType) -> ErrorType?
@@ -26,14 +26,6 @@ public class StatefulReader : Reader
         self.reader = reader
         frameStack.append(rootFrame)
     }
-    
-    public var bytesAvailable : Int {
-        return reader.bytesAvailable
-    }
-    
-    public func read() -> (value: UInt8, error: ErrorType?) {
-        return reader.read()
-    }
 
     /**
      * Initiate a read for at least one byte.
@@ -46,7 +38,7 @@ public class StatefulReader : Reader
         // Simple consumer that takes what ever data is returned
         self.consume({ (reader) -> (finished: Bool, error: ErrorType?) in
             // copy from buffer to readBuffer
-            reader.read(readBuffer, length: min(readLength, reader.bytesAvailable), callback: nil)
+            reader.read(readBuffer, length: min(readLength, reader.bytesReadable), callback: nil)
             callback?(length: min(readLength, length), error: nil)
             return (true, nil)
         }, onError: {(error : ErrorType) -> ErrorType? in
@@ -67,7 +59,7 @@ public class StatefulReader : Reader
         // Simple consumer that takes what ever data is returned
         consume({ (reader) -> (finished: Bool, error: ErrorType?) in
             let remaining = totalRemaining - totalConsumed
-            let nCopied = min(remaining, reader.bytesAvailable)
+            let nCopied = min(remaining, reader.bytesReadable)
             reader.read(readBuffer.advancedBy(totalConsumed), length: nCopied, callback: nil)
             
             totalConsumed += nCopied
@@ -90,7 +82,7 @@ public class StatefulReader : Reader
         var returnedString = ""
         consume({ (reader) -> (finished: Bool, error: ErrorType?) in
             var finished = false
-            while reader.bytesAvailable > 0
+            while reader.bytesReadable > 0
             {
                 let (currChar, _) = reader.read()
             
@@ -114,7 +106,7 @@ public class StatefulReader : Reader
         var numBytesLeft = numBytes
         var output : Int64 = 0
         consume({(reader) -> (finished: Bool, error: ErrorType?) in
-            let length = min(numBytesLeft, reader.bytesAvailable)
+            let length = min(numBytesLeft, reader.bytesReadable)
             if bigEndian {
                 for _ in 0..<length
                 {
@@ -141,21 +133,21 @@ public class StatefulReader : Reader
     public func readInt8(callback : ((value : Int8, error : ErrorType?) -> Void)?)
     {
         return readNBytes(1, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
-            callback?(value: Int8(truncatingBitPattern: (value & 0x00000000000000ff)), error: nil)
+            callback?(value: Int8(truncatingBitPattern: (value & 0x00000000000000ff)), error: error)
         })
     }
     
     public func readInt16(callback : ((value : Int16, error : ErrorType?) -> Void)?)
     {
         return readNBytes(2, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
-            callback?(value: Int16(truncatingBitPattern: (value & 0x000000000000ffff)), error: nil)
+            callback?(value: Int16(truncatingBitPattern: (value & 0x000000000000ffff)), error: error)
         })
     }
     
     public func readInt32(callback : ((value : Int32, error : ErrorType?) -> Void)?)
     {
         return readNBytes(4, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
-            callback?(value: Int32(truncatingBitPattern: (value & 0x00000000ffffffff)), error: nil)
+            callback?(value: Int32(truncatingBitPattern: (value & 0x00000000ffffffff)), error: error)
         })
     }
     
@@ -167,21 +159,21 @@ public class StatefulReader : Reader
     public func readUInt8(callback : ((value : UInt8, error : ErrorType?) -> Void)?)
     {
         return readNBytes(1, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
-            callback?(value: UInt8(truncatingBitPattern: (value & 0x00000000000000ff)), error: nil)
+            callback?(value: UInt8(truncatingBitPattern: (value & 0x00000000000000ff)), error: error)
         })
     }
     
     public func readUInt16(callback : ((value : UInt16, error : ErrorType?) -> Void)?)
     {
         return readNBytes(2, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
-            callback?(value: UInt16(truncatingBitPattern: (value & 0x000000000000ffff)), error: nil)
+            callback?(value: UInt16(truncatingBitPattern: (value & 0x000000000000ffff)), error: error)
         })
     }
     
     public func readUInt32(callback : ((value : UInt32, error : ErrorType?) -> Void)?)
     {
         return readNBytes(4, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
-            callback?(value: UInt32(truncatingBitPattern: (value & 0x00000000ffffffff)), error: nil)
+            callback?(value: UInt32(truncatingBitPattern: (value & 0x00000000ffffffff)), error: error)
         })
     }
     
@@ -247,7 +239,7 @@ public class StatefulReader : Reader
         
         // ensure this happens in reader's runloop
         // if we have data in the buffer, pass that to the consumer
-        if reader.bytesAvailable > 0 {
+        if reader.bytesReadable > 0 {
             // there is data available so give it to the candidate callback
             if var topFrame = frameStack.last
             {
@@ -344,14 +336,14 @@ public class StatefulReader : Reader
 private class ConsumerFrame
 {
     weak var parentFrame : ConsumerFrame?
-    var callback : StatefulReader.ConsumerCallback?
-    var errorCallback : StatefulReader.ErrorCallback?
+    var callback : DataReader.ConsumerCallback?
+    var errorCallback : DataReader.ErrorCallback?
     var callbackCalled = false
     var finished = false
     var error : ErrorType? = nil
     var children = [ConsumerFrame]()
     
-    init(_ callback: StatefulReader.ConsumerCallback?, _ errorCallback: StatefulReader.ErrorCallback?)
+    init(_ callback: DataReader.ConsumerCallback?, _ errorCallback: DataReader.ErrorCallback?)
     {
         self.callback = callback
         self.errorCallback = errorCallback
