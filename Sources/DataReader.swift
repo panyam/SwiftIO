@@ -16,6 +16,7 @@ public class DataReader
     private var reader : Reader
     private var rootFrame = ConsumerFrame(nil, nil)
     private var frameStack = [ConsumerFrame]()
+    private var currentUnwindingError : ErrorType?
     
     public var stream : Stream {
         return reader.stream
@@ -111,7 +112,7 @@ public class DataReader
                 for _ in 0..<length
                 {
                     let (nextByte, _) = reader.read()
-                    output = (output << 8) | Int64(Int8(bitPattern: nextByte))
+                    output = (output << 8) | (Int64(Int8(bitPattern: nextByte)) & 0xff)
                     numBytesLeft--
                 }
             } else {
@@ -219,6 +220,13 @@ public class DataReader
     
     private func produceBytesForConsumer(c : ConsumerCallback?, onError: ErrorCallback?, lastError: ErrorType?)
     {
+        if currentUnwindingError != nil
+        {
+            // add to the root frame - it will just get to it eventually
+            self.rootFrame.addConsumer(ConsumerFrame(nil, onError))
+            return
+        }
+
         if let consumerCallback = c
         {
             frameStack.last!.addConsumer(ConsumerFrame(consumerCallback, onError))
@@ -305,6 +313,7 @@ public class DataReader
     {
         if var topFrame = frameStack.last
         {
+            currentUnwindingError = error
             while topFrame.firstFrame != nil {
                 topFrame = topFrame.firstFrame!
             }
@@ -312,7 +321,7 @@ public class DataReader
             var currError : ErrorType? = error
             // pop off finished frames
             var finalFrame : ConsumerFrame? = topFrame
-            while frameStack.count > 1 || frameStack[0].children.isEmpty && currError != nil {
+            while frameStack.count > 1 || (!frameStack[0].children.isEmpty && currError != nil) {
                 let parentFrame = finalFrame?.parentFrame!
                 if let errorCallback = finalFrame?.errorCallback {
                     currError = errorCallback(error: currError!)
@@ -325,6 +334,7 @@ public class DataReader
                     finalFrame = finalFrame?.firstFrame
                 }
             }
+            currentUnwindingError = nil
         }
     }
 }

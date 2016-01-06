@@ -106,6 +106,8 @@ public class CFSocketClient : Stream {
                 clientSocketCallback,
                 UnsafePointer<CFSocketContext>($0))
         }
+        var sock_opt_on = Int32(1)
+        setsockopt(clientSocketNative, SOL_SOCKET, SO_NOSIGPIPE, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
         runLoopSource = CFSocketCreateRunLoopSource(kCFAllocatorDefault, clientSocket, 0)
         CFRunLoopAddSource(cfRunLoop, runLoopSource, kCFRunLoopDefaultMode)
     }
@@ -126,6 +128,10 @@ public class CFSocketClient : Stream {
         // It is safe to call recv; it won’t block because bytes are available.
         if let consumer = self.consumer
         {
+            if !CFSocketIsValid(clientSocket)
+            {
+                handleWriteError(EPIPE)
+            }
             if let (buffer, length) = consumer.readDataRequested() {
                 if length > 0 {
                     let bytesRead = recv(clientSocketNative, buffer, length, 0)
@@ -149,7 +155,11 @@ public class CFSocketClient : Stream {
     func canAcceptBytes() {
         if let producer = self.producer
         {
-            if let (buffer, length) = producer.writeDataRequested() {
+            if !CFSocketIsValid(clientSocket)
+            {
+                handleWriteError(EPIPE)
+            }
+            else if let (buffer, length) = producer.writeDataRequested() {
                 if length > 0 {
                     let numWritten = send(clientSocketNative, buffer, length, 0)
                     if numWritten > 0 {

@@ -112,8 +112,8 @@ public class CFSocketServer : StreamServer
                 outSocket = CFSocketCreate(kCFAllocatorDefault, PF_INET, 0, 0, 2, handleConnectionAccept, UnsafePointer<CFSocketContext>($0));
             }
             
-            var sock_opt_on = Int32(1)
             let nativeSocket = CFSocketGetNative(outSocket)
+            var sock_opt_on = Int32(1)
             setsockopt(nativeSocket, SOL_SOCKET, SO_REUSEADDR, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
             setsockopt(nativeSocket, SOL_SOCKET, SO_REUSEPORT, &sock_opt_on, socklen_t(sizeofValue(sock_opt_on)))
             

@@ -111,21 +111,33 @@ public class StreamWriter : Writer, StreamProducer
     
     public func flush(callback: CompletionCallback?)
     {
-        assert(false, "not yet implemented")
+        if self.writeRequests.isEmpty
+        {
+            callback?(error: nil)
+        } else
+        {
+            self.writeRequests.append(IORequest(buffer: nil, length:0, callback: {(length: LengthType, error: ErrorType?) in
+                callback?(error: error)
+            }))
+        }
     }
     
     public func write(value: UInt8, _ callback: CompletionCallback?)
     {
-        assert(false, "not yet implemented")
-//        self.write(buffer, length: 1, _ callback: callback)
+        // TODO: has to be better way than creating a buffer each time!
+        let buffer = WriteBufferType.alloc(1)
+        buffer[0] = value
+        self.write(buffer, length: 1) {(length: LengthType, error: ErrorType?) in
+            callback?(error: error)
+        }
     }
     
     public func write(buffer: WriteBufferType, length: LengthType, _ callback: IOCallback?)
     {
         stream.runLoop.ensure {
             self.writeRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
+            self.stream.setReadyToWrite()
         }
-        self.stream.setReadyToWrite()
     }
     
     public func receivedWriteError(error: SocketErrorType) {
@@ -141,6 +153,7 @@ public class StreamWriter : Writer, StreamProducer
      */
     public func writeDataRequested() -> (buffer: WriteBufferType, length: LengthType)?
     {
+        // remove all flush requests
         if let request = writeRequests.first {
             return (request.buffer.advancedBy(request.satisfied), request.remaining)
         }
@@ -164,9 +177,7 @@ public class StreamWriter : Writer, StreamProducer
                 // remove all flush requests that may appear here
                 while !writeRequests.isEmpty && writeRequests.first?.length == 0
                 {
-                    let ioRequest = writeRequests.first!
-                    writeRequests.removeFirst()
-                    ioRequest.callback?(length: 0, error: nil)
+                    writeRequests.removeFirst().callback?(length: 0, error: nil)
                 }
             }
         }
@@ -223,10 +234,10 @@ public class StreamReader : Reader, StreamConsumer {
     }
     
     public func receivedReadError(error: SocketErrorType) {
-        for request in readRequests {
-            request.invokeCallback(error)
+        while !readRequests.isEmpty
+        {
+            readRequests.removeFirst().invokeCallback(error)
         }
-        readRequests.removeAll()
     }
     
     public func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: LengthType)? {
