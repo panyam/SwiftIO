@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class DataReader
+public class DataReader2
 {
     public typealias ConsumerCallback = (reader: Reader) -> (finished: Bool, error: ErrorType?)
     public typealias ErrorCallback = (error : ErrorType) -> ErrorType?
@@ -337,45 +337,45 @@ public class DataReader
             currentUnwindingError = nil
         }
     }
-}
-
-/**
- * Keeps track of the reed request "call tree" indiciating where and how
- * data read from the stream should be delivered to.
- */
-private class ConsumerFrame
-{
-    weak var parentFrame : ConsumerFrame?
-    var callback : DataReader.ConsumerCallback?
-    var errorCallback : DataReader.ErrorCallback?
-    var callbackCalled = false
-    var finished = false
-    var error : ErrorType? = nil
-    var children = [ConsumerFrame]()
     
-    init(_ callback: DataReader.ConsumerCallback?, _ errorCallback: DataReader.ErrorCallback?)
+    /**
+     * Keeps track of the reed request "call tree" indiciating where and how
+     * data read from the stream should be delivered to.
+     */
+    private class ConsumerFrame
     {
-        self.callback = callback
-        self.errorCallback = errorCallback
-    }
-    
-    func addConsumer(newFrame: ConsumerFrame)
-    {
-        newFrame.parentFrame = self
-        children.append(newFrame)
-    }
-    
-    func removeIfFinished()
-    {
-        if finished && children.isEmpty {
-            // Now no new frames were added *and* the current frame had finished
-            // so remove it from its parents child list
-            assert(self === parentFrame?.children.first, "Frame MUST be parent's first frame")
-            parentFrame?.children.removeFirst()
+        weak var parentFrame : ConsumerFrame?
+        var callback : ConsumerCallback?
+        var errorCallback : ErrorCallback?
+        var callbackCalled = false
+        var finished = false
+        var error : ErrorType? = nil
+        var children = [ConsumerFrame]()
+        
+        init(_ callback: ConsumerCallback?, _ errorCallback: ErrorCallback?)
+        {
+            self.callback = callback
+            self.errorCallback = errorCallback
         }
-    }
-    
-    var firstFrame : ConsumerFrame? {
-        get { return children.first }
+        
+        func addConsumer(newFrame: ConsumerFrame)
+        {
+            newFrame.parentFrame = self
+            children.append(newFrame)
+        }
+        
+        func removeIfFinished()
+        {
+            if finished && children.isEmpty {
+                // Now no new frames were added *and* the current frame had finished
+                // so remove it from its parents child list
+                assert(self === parentFrame?.children.first, "Frame MUST be parent's first frame")
+                parentFrame?.children.removeFirst()
+            }
+        }
+        
+        var firstFrame : ConsumerFrame? {
+            get { return children.first }
+        }
     }
 }

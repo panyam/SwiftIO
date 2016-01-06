@@ -41,6 +41,22 @@ public class BufferedReader : Reader {
             return (dataBuffer.advanceBy(1), nil)
         }
     }
+    
+    /**
+     * Peeks at the next byte without actually reading it
+     */
+    public func peek(callback: PeekCallback?)
+    {
+        if dataBuffer.length == 0
+        {
+            dataBuffer.read(reader) { (length, error) in
+                callback?(value: self.dataBuffer.advanceBy(0), error: error)
+            }
+        } else
+        {
+            callback?(value: dataBuffer.advanceBy(0), error: nil)
+        }
+    }
 
     /**
      * Initiate a read for at least one byte.
