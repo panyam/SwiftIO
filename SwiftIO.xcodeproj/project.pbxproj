@@ -633,6 +633,7 @@
 		F7CF645D1C2094F600493204 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -640,6 +641,7 @@
 		F7CF645E1C2094F600493204 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
