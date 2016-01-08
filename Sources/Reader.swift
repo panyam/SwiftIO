@@ -102,32 +102,34 @@ public extension Reader
             return true
         }
 
-        func readNextByte()
+        func readNextByte(error: ErrorType?)
         {
+            if error != nil
+            {
+                callback?(value: output, error: error)
+                return
+            }
             while bytesReadable > 0 && numBytesLeft > 0
             {
                 let (nextByte, error) = read()
                 if error == nil
                 {
-                    readNextByte()
-                } else {
                     consumeByte(nextByte)
+                    readNextByte(nil)
+                } else {
+                    callback?(value: output, error: error)
                 }
             }
 
             if bytesReadable == 0 && numBytesLeft > 0
             {
-                peek({ (value, error) -> Void in
-                    if error == nil
-                    {
-                        readNextByte()
-                    } else {
-                        callback?(value: output, error: error)
-                    }
-                })
+                peek{ (value, error) in
+                    readNextByte(error)
+                }
             } else {
             }
         }
+        readNextByte(nil)
     }
     
     public func readInt8(callback : ((value : Int8, error : ErrorType?) -> Void)?)
