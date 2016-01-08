@@ -190,8 +190,8 @@
 		F7CF643C1C2094B900493204 /* SwiftIO */ = {
 			isa = PBXGroup;
 			children = (
-				F7CF64711C20C07A00493204 /* SwiftIO.h */,
 				F7CF645F1C20958D00493204 /* Sources */,
+				F7CF64711C20C07A00493204 /* SwiftIO.h */,
 				F7CF643F1C2094B900493204 /* Info.plist */,
 			);
 			path = SwiftIO;
