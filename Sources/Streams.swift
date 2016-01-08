@@ -221,6 +221,10 @@ public class StreamReader : Reader, StreamConsumer {
         return 0
     }
     
+    public func peek(callback: PeekCallback?) {
+        assert(false, "Not yet implemented")
+    }
+    
     public func read() -> (value: UInt8, error: ErrorType?) {
         return (0, IOErrorType.Unavailable)
     }

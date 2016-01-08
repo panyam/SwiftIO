@@ -80,4 +80,108 @@ public extension Reader
             }
         }
     }
+    
+    public func readNBytes(numBytes : Int, bigEndian: Bool, callback : ((value : Int64, error: ErrorType?) -> Void)?)
+    {
+        var numBytesLeft = numBytes
+        var output : Int64 = 0
+        
+        func consumeByte(nextByte : UInt8) -> Bool
+        {
+            if bigEndian {
+                output = (output << 8) | (Int64(Int8(bitPattern: nextByte)) & 0xff)
+            } else {
+                output = ((Int64(Int8(bitPattern: nextByte)) & 0xff) << 8) | (output & 0xff)
+            }
+            numBytesLeft--
+            if numBytesLeft == 0
+            {
+                callback?(value: output, error: nil)
+                return false
+            }
+            return true
+        }
+
+        func readNextByte()
+        {
+            while bytesReadable > 0 && numBytesLeft > 0
+            {
+                let (nextByte, error) = read()
+                if error == nil
+                {
+                    readNextByte()
+                } else {
+                    consumeByte(nextByte)
+                }
+            }
+
+            if bytesReadable == 0 && numBytesLeft > 0
+            {
+                peek({ (value, error) -> Void in
+                    if error == nil
+                    {
+                        readNextByte()
+                    } else {
+                        callback?(value: output, error: error)
+                    }
+                })
+            } else {
+            }
+        }
+    }
+    
+    public func readInt8(callback : ((value : Int8, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(1, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: Int8(truncatingBitPattern: (value & 0x00000000000000ff)), error: error)
+        })
+    }
+    
+    public func readInt16(callback : ((value : Int16, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(2, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: Int16(truncatingBitPattern: (value & 0x000000000000ffff)), error: error)
+        })
+    }
+    
+    public func readInt32(callback : ((value : Int32, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(4, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: Int32(truncatingBitPattern: (value & 0x00000000ffffffff)), error: error)
+        })
+    }
+    
+    public func readInt64(callback : ((value : Int64, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(8, bigEndian: true, callback: callback)
+    }
+    
+    public func readUInt8(callback : ((value : UInt8, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(1, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: UInt8(truncatingBitPattern: (value & 0x00000000000000ff)), error: error)
+        })
+    }
+    
+    public func readUInt16(callback : ((value : UInt16, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(2, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: UInt16(truncatingBitPattern: (value & 0x000000000000ffff)), error: error)
+        })
+    }
+    
+    public func readUInt32(callback : ((value : UInt32, error : ErrorType?) -> Void)?)
+    {
+        return readNBytes(4, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+            callback?(value: UInt32(truncatingBitPattern: (value & 0x00000000ffffffff)), error: error)
+        })
+    }
+    
+    public func readUInt64(callback : ((value : UInt64, error : ErrorType?) -> Void)?)
+    {
+        let origCallback = callback
+        return readNBytes(8, bigEndian: true, callback: { (value, error) in
+            origCallback?(value: UInt64(value), error: error)
+        })
+    }
 }

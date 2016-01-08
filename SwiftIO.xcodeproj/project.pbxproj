@@ -35,7 +35,6 @@
 		F73A8CB51C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
 		F73A8CB61C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
 		F769F7A81C34CD8F00A59A75 /* IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = F769F7A71C34CD8F00A59A75 /* IO.swift */; };
-		F769F7AA1C34CEE600A59A75 /* DataReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = F769F7A91C34CEE600A59A75 /* DataReader.swift */; };
 		F7CF64451C2094B900493204 /* SwiftIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF643A1C2094B900493204 /* SwiftIO.framework */; };
 		F7CF644A1C2094B900493204 /* SwiftIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64491C2094B900493204 /* SwiftIOTests.swift */; };
 		F7CF645B1C2094F600493204 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF645A1C2094F600493204 /* main.swift */; };
@@ -108,7 +107,6 @@
 		F73A8CB01C245C6500352333 /* BufferedReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferedReader.swift; sourceTree = "<group>"; };
 		F73A8CB21C245E5900352333 /* Buffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buffer.swift; sourceTree = "<group>"; };
 		F769F7A71C34CD8F00A59A75 /* IO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IO.swift; sourceTree = "<group>"; };
-		F769F7A91C34CEE600A59A75 /* DataReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataReader.swift; sourceTree = "<group>"; };
 		F7CF643A1C2094B900493204 /* SwiftIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7CF643F1C2094B900493204 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F7CF64441C2094B900493204 /* SwiftIOTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftIOTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -229,7 +227,6 @@
 				F7F1304B1C2C00EE00CA528A /* FileStreams.swift */,
 				F7F130511C2D234000CA528A /* RunLoop.swift */,
 				F769F7A71C34CD8F00A59A75 /* IO.swift */,
-				F769F7A91C34CEE600A59A75 /* DataReader.swift */,
 				F7376F3B1C39C12B00CBAD38 /* Reader.swift */,
 				F7376F3F1C39C14500CBAD38 /* Writer.swift */,
 				F7376F471C3A0B2C00CBAD38 /* DataWriter.swift */,
@@ -411,7 +408,6 @@
 				F7CF64641C20958D00493204 /* CFSocketServer.swift in Sources */,
 				F7376F481C3A0B2C00CBAD38 /* DataWriter.swift in Sources */,
 				F7F130521C2D234000CA528A /* RunLoop.swift in Sources */,
-				F769F7AA1C34CEE600A59A75 /* DataReader.swift in Sources */,
 				F73A8CAC1C23A83C00352333 /* Streams.swift in Sources */,
 				F769F7A81C34CD8F00A59A75 /* IO.swift in Sources */,
 				F73A8CA81C2361A200352333 /* CFHelper.swift in Sources */,
