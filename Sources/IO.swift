@@ -22,11 +22,6 @@ public enum IOErrorType : ErrorType
      * When the pipe has closed and no more read/write is possible
      */
     case Closed
-
-    /**
-     * When the end of a stream has been reached and no more data can be read or written.
-     */
-    case EndReached
     
     /**
      * When no more data is currently available on a read stream (a read would result in a block until data is available)
