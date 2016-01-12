@@ -115,7 +115,7 @@ public extension Reader
                 if error == nil
                 {
                     consumeByte(nextByte)
-                    readNextByte(nil)
+//                    readNextByte(nil)
                 } else {
                     callback?(value: output, error: error)
                 }
