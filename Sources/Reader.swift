@@ -53,6 +53,35 @@ public protocol Reader {
 public extension Reader
 {
     /**
+     * Blocks until all the requested data has been read or an error occurred.
+     */
+    public func readFully(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
+    {
+        var remaining = length
+        var offset = 0
+        
+        func partialRead()
+        {
+            self.read(buffer.advancedBy(offset), length: remaining) {(length, error) in
+                if error != nil
+                {
+                    callback?(length: offset, error: error)
+                } else {
+                    offset += length
+                    remaining -= length
+                    if remaining == 0 {
+                        callback?(length: offset, error: nil)
+                    } else {
+                        partialRead()
+                    }
+                }
+            }
+        }
+        
+        partialRead()
+    }
+    
+    /**
      * Read till a particular character is encountered (not including the delimiter).
      */
     public func readTillChar(delimiter: UInt8, callback : ((str : String, error: ErrorType?) -> Void)?)

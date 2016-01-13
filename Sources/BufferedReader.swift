@@ -64,6 +64,7 @@ public class BufferedReader : Reader {
     public func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
         let readBuffer = buffer
+        let readLength = length
         
         if dataBuffer.length > 0
         {
@@ -82,7 +83,7 @@ public class BufferedReader : Reader {
             dataBuffer.read(reader) { (length, error) in
                 if error == nil
                 {
-                    self.read(buffer, length: length, callback: callback)
+                    self.read(buffer, length: readLength, callback: callback)
                 } else {
                     callback?(length: length, error: error)
                 }
