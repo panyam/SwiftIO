@@ -109,19 +109,6 @@ public class StreamWriter : Writer, StreamProducer
         theStream = stream
     }
     
-    public func flush(callback: CompletionCallback?)
-    {
-        if self.writeRequests.isEmpty
-        {
-            callback?(error: nil)
-        } else
-        {
-            self.writeRequests.append(IORequest(buffer: nil, length:0, callback: {(length: LengthType, error: ErrorType?) in
-                callback?(error: error)
-            }))
-        }
-    }
-    
     public func write(value: UInt8, _ callback: CompletionCallback?)
     {
         // TODO: has to be better way than creating a buffer each time!

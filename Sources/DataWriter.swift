@@ -19,7 +19,6 @@ public class DataWriter
     
     public func writeNBytes(numBytes : Int, _ value: Int, bigEndian: Bool, _ callback : CompletionCallback?)
     {
-        print("Writing \(numBytes) bytes: \(value)")
         var numBytesLeft = numBytes
         while numBytesLeft > 0
         {
