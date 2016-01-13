@@ -218,6 +218,7 @@ public class StreamReader : Reader, StreamConsumer {
     
     public func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
+        assert(self.readRequests.isEmpty)
         stream.runLoop.ensure {
             self.readRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
         }
@@ -239,10 +240,14 @@ public class StreamReader : Reader, StreamConsumer {
     }
     
     public func streamClosed() {
-        for request in readRequests {
-            request.invokeCallback(IOErrorType.Closed)
+        while !readRequests.isEmpty
+        {
+            if let request = readRequests.first
+            {
+                readRequests.removeFirst()
+                request.invokeCallback(IOErrorType.Closed)
+            }
         }
-        readRequests.removeAll()
     }
     
     /**
