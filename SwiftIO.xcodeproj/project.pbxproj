@@ -44,6 +44,7 @@
 		F7CF64671C2095E600493204 /* CFSocketServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64611C20958D00493204 /* CFSocketServer.swift */; };
 		F7CF646A1C209A1700493204 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF64691C209A1700493204 /* CoreFoundation.framework */; };
 		F7CF64721C20C07A00493204 /* SwiftIO.h in Headers */ = {isa = PBXBuildFile; fileRef = F7CF64711C20C07A00493204 /* SwiftIO.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F7E170E11C474E1B00BE624D /* DebugGlobals.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7E170E01C474E1B00BE624D /* DebugGlobals.swift */; };
 		F7F1304C1C2C00EE00CA528A /* FileStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F1304B1C2C00EE00CA528A /* FileStreams.swift */; };
 		F7F1304D1C2C00EE00CA528A /* FileStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F1304B1C2C00EE00CA528A /* FileStreams.swift */; };
 		F7F1304E1C2C00EE00CA528A /* FileStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F1304B1C2C00EE00CA528A /* FileStreams.swift */; };
@@ -118,6 +119,7 @@
 		F7CF64611C20958D00493204 /* CFSocketServer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CFSocketServer.swift; sourceTree = "<group>"; };
 		F7CF64691C209A1700493204 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		F7CF64711C20C07A00493204 /* SwiftIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftIO.h; sourceTree = "<group>"; };
+		F7E170E01C474E1B00BE624D /* DebugGlobals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DebugGlobals.swift; sourceTree = "<group>"; };
 		F7F1304B1C2C00EE00CA528A /* FileStreams.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileStreams.swift; sourceTree = "<group>"; };
 		F7F130511C2D234000CA528A /* RunLoop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunLoop.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -230,6 +232,7 @@
 				F7376F3B1C39C12B00CBAD38 /* Reader.swift */,
 				F7376F3F1C39C14500CBAD38 /* Writer.swift */,
 				F7376F471C3A0B2C00CBAD38 /* DataWriter.swift */,
+				F7E170E01C474E1B00BE624D /* DebugGlobals.swift */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -417,6 +420,7 @@
 				F7CF64631C20958D00493204 /* CFSocketClient.swift in Sources */,
 				F7376F401C39C14500CBAD38 /* Writer.swift in Sources */,
 				F73A8CB31C245E5900352333 /* Buffer.swift in Sources */,
+				F7E170E11C474E1B00BE624D /* DebugGlobals.swift in Sources */,
 				F7F1304C1C2C00EE00CA528A /* FileStreams.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

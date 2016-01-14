@@ -72,7 +72,7 @@ public class CFSocketClient : Stream {
         // Should this be called here?
         // It is possible that a client can call this as many as
         // time as it needs greedily
-        if readsAreEdgeTriggered {
+        if readsAreEdgeTriggered || true {
             streamRunLoop.enqueue {
                 self.hasBytesAvailable()
             }
@@ -134,11 +134,21 @@ public class CFSocketClient : Stream {
             }
             if let (buffer, length) = consumer.readDataRequested() {
                 if length > 0 {
-                    let bytesRead = recv(clientSocketNative, buffer, length, 0)
+                    let bytesRead = recv(clientSocketNative, buffer, length, MSG_DONTWAIT)
+                    print("Bytes Read: \(bytesRead), errno (\(errno)): \(strerror(errno))")
                     if bytesRead > 0 {
                         consumer.dataReceived(bytesRead)
                     } else if bytesRead < 0 {
-                        handleReadError(errno)
+                        if errno != EAGAIN
+                        {
+                            print("Read failed, errno (\(errno)): \(strerror(errno))")
+                            handleReadError(errno)
+                        } else {
+                            // try again later
+                            self.streamRunLoop.enqueueAfter(0.1) {
+                                self.hasBytesAvailable()
+                            }
+                        }
                     } else {
                         // peer has closed so should we finish?
                         consumer.dataReceived(bytesRead)

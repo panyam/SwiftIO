@@ -221,8 +221,8 @@ public class StreamReader : Reader, StreamConsumer {
         assert(self.readRequests.isEmpty)
         stream.runLoop.ensure {
             self.readRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
+            self.stream.setReadyToRead()
         }
-        self.stream.setReadyToRead()
     }
     
     public func receivedReadError(error: SocketErrorType) {
