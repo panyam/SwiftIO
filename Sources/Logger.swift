@@ -34,7 +34,7 @@ public class Logger
     }
     
     public func prefix(level: LogLevel) -> String {
-        return "[\(level)] \(dateFormatter.stringFromDate(NSDate())) <\(NSThread.currentThread())>: "
+        return "[\(level)] \(dateFormatter.stringFromDate(NSDate())): "
     }
     
     public func trace(str: String) { log(.TRACE, str) }
