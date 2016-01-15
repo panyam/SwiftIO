@@ -8,7 +8,7 @@ srandom(UInt32(clock()))
 import CoreFoundation
 import SwiftIO
 
-print("Testing....")
+Log.debug("Testing....")
 
 class EchoStream
 {
@@ -53,6 +53,6 @@ server.streamHandler = EchoFactory()
 server.start()
 
 while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, false) != CFRunLoopRunResult.Finished {
-    print("Clocked ticked...")
+    Log.debug("Clocked ticked...")
 }
 

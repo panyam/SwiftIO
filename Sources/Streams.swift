@@ -24,7 +24,7 @@ public protocol StreamConsumer {
     /**
      * Called when read error received.
      */
-    func receivedReadError(error: SocketErrorType)
+    func receivedReadError(error: ErrorType)
     
     /**
      * Called by the stream when it can pass data to be processed.
@@ -189,7 +189,7 @@ public class StreamReader : Reader, StreamConsumer {
     /**
      * The underlying connection object this is listening to.
      */
-    private var readRequests = [IORequest]()
+    public var readRequests = [IORequest]()
     /**
      * The underlying connection object this is listening to.
      */
@@ -218,17 +218,20 @@ public class StreamReader : Reader, StreamConsumer {
     
     public func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
-        assert(self.readRequests.isEmpty)
+//        assert(self.readRequests.isEmpty)
         stream.runLoop.ensure {
             self.readRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
             self.stream.setReadyToRead()
         }
     }
     
-    public func receivedReadError(error: SocketErrorType) {
+    public func receivedReadError(error: ErrorType) {
         while !readRequests.isEmpty
         {
-            readRequests.removeFirst().invokeCallback(error)
+            let nextRequest = readRequests.removeFirst()
+            stream.runLoop.enqueue {
+                nextRequest.invokeCallback(error)
+            }
         }
     }
     
@@ -240,14 +243,7 @@ public class StreamReader : Reader, StreamConsumer {
     }
     
     public func streamClosed() {
-        while !readRequests.isEmpty
-        {
-            if let request = readRequests.first
-            {
-                readRequests.removeFirst()
-                request.invokeCallback(IOErrorType.Closed)
-            }
-        }
+        receivedReadError(IOErrorType.Closed)
     }
     
     /**
@@ -269,7 +265,7 @@ public class StreamReader : Reader, StreamConsumer {
     }
 }
 
-private class IORequest
+public class IORequest
 {
     var buffer: ReadBufferType
     var length: LengthType

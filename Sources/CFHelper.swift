@@ -248,7 +248,7 @@ public class CFStream : Stream
 
     func handleReadError() {
         let error = CFReadStreamGetError(readStream);
-        print("Read error: \(error)")
+        Log.debug("Read error: \(error)")
         if let consumer = self.consumer
         {
             consumer.receivedReadError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))
@@ -331,7 +331,7 @@ public class CFStream : Stream
                         // error?
                         handleWriteError()
                     } else {
-                        print("0 bytes sent")
+                        Log.debug("0 bytes sent")
                     }
                     
                     if numWritten >= 0 && numWritten < length {
@@ -359,7 +359,7 @@ public class CFStream : Stream
     
     func handleWriteError() {
         let error = CFWriteStreamGetError(writeStream);
-        print("Write error: \(error)")
+        Log.debug("Write error: \(error)")
         if let producer = self.producer
         {
             producer.receivedWriteError(SocketErrorType(domain: (error.domain as NSNumber).stringValue, code: error.error, message: ""))

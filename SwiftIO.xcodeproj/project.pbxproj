@@ -49,6 +49,7 @@
 		F7F1304D1C2C00EE00CA528A /* FileStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F1304B1C2C00EE00CA528A /* FileStreams.swift */; };
 		F7F1304E1C2C00EE00CA528A /* FileStreams.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F1304B1C2C00EE00CA528A /* FileStreams.swift */; };
 		F7F130521C2D234000CA528A /* RunLoop.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F130511C2D234000CA528A /* RunLoop.swift */; };
+		F7F74C1B1C48CAE8005A5322 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F74C1A1C48CAE8005A5322 /* Logger.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,6 +123,7 @@
 		F7E170E01C474E1B00BE624D /* DebugGlobals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DebugGlobals.swift; sourceTree = "<group>"; };
 		F7F1304B1C2C00EE00CA528A /* FileStreams.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileStreams.swift; sourceTree = "<group>"; };
 		F7F130511C2D234000CA528A /* RunLoop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunLoop.swift; sourceTree = "<group>"; };
+		F7F74C1A1C48CAE8005A5322 /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -233,6 +235,7 @@
 				F7376F3F1C39C14500CBAD38 /* Writer.swift */,
 				F7376F471C3A0B2C00CBAD38 /* DataWriter.swift */,
 				F7E170E01C474E1B00BE624D /* DebugGlobals.swift */,
+				F7F74C1A1C48CAE8005A5322 /* Logger.swift */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -418,6 +421,7 @@
 				F73A8C921C22863F00352333 /* ErrorTypes.swift in Sources */,
 				F73A8CB11C245C6500352333 /* BufferedReader.swift in Sources */,
 				F7CF64631C20958D00493204 /* CFSocketClient.swift in Sources */,
+				F7F74C1B1C48CAE8005A5322 /* Logger.swift in Sources */,
 				F7376F401C39C14500CBAD38 /* Writer.swift in Sources */,
 				F73A8CB31C245E5900352333 /* Buffer.swift in Sources */,
 				F7E170E11C474E1B00BE624D /* DebugGlobals.swift in Sources */,

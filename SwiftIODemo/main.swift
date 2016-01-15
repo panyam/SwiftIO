@@ -8,7 +8,7 @@ srandom(UInt32(clock()))
 import CoreFoundation
 import SwiftIO
 
-print("Testing....")
+Log.debug("Testing....")
 
 class EchoHandler : StreamProducer, StreamConsumer
 {
@@ -21,15 +21,15 @@ class EchoHandler : StreamProducer, StreamConsumer
      */
     func connectionClosed()
     {
-        print("Good bye!")
+        Log.debug("Good bye!")
     }
     
-    func receivedReadError(error: SocketErrorType) {
-        print("Read Error: \(error)")
+    func receivedReadError(error: ErrorType) {
+        Log.debug("Read Error: \(error)")
     }
     
     func receivedWriteError(error: SocketErrorType) {
-        print("Write Error: \(error)")
+        Log.debug("Write Error: \(error)")
     }
     
     /**
@@ -38,7 +38,7 @@ class EchoHandler : StreamProducer, StreamConsumer
      */
     func writeDataRequested() -> (buffer: BufferType, length: LengthType)?
     {
-        print("Write data requested...");
+        Log.debug("Write data requested...");
         return (buffer, length)
     }
     
@@ -86,6 +86,6 @@ server.streamHandler = EchoFactory()
 server.start()
 
 while CFRunLoopRunInMode(kCFRunLoopDefaultMode, 5, false) != CFRunLoopRunResult.Finished {
-    print("Clocked ticked...")
+    Log.debug("Clocked ticked...")
 }
 

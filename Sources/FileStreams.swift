@@ -20,7 +20,7 @@ public func SizeOfFile(filePath: String) -> LengthType? {
             return LengthType(_attr.fileSize());
         }
     } catch {
-        print("Error: \(error)")
+        Log.debug("Error: \(error)")
     }
     return nil
 }

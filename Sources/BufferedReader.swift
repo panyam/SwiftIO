@@ -9,7 +9,7 @@
 import Foundation
 
 public class BufferedReader : Reader {
-    private var reader : Reader
+    public var reader : Reader
     private var dataBuffer : Buffer
     private var bufferSize : LengthType = 0
     
@@ -80,7 +80,9 @@ public class BufferedReader : Reader {
                 callback?(length: 0, error: nil)
             }
         } else {
+            Log.debug("Buff Reader Number of outstanding read requests BEFORE: \((self.reader as! StreamReader).readRequests)")
             dataBuffer.read(reader) { (length, error) in
+                Log.debug("Buff Reader Number of outstanding read requests AFTER: \((self.reader as! StreamReader).readRequests)")
                 if error == nil
                 {
                     self.read(buffer, length: readLength, callback: callback)

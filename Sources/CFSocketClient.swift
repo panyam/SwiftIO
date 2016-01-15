@@ -135,13 +135,12 @@ public class CFSocketClient : Stream {
             if let (buffer, length) = consumer.readDataRequested() {
                 if length > 0 {
                     let bytesRead = recv(clientSocketNative, buffer, length, MSG_DONTWAIT)
-                    print("Bytes Read: \(bytesRead), errno (\(errno)): \(strerror(errno))")
                     if bytesRead > 0 {
                         consumer.dataReceived(bytesRead)
                     } else if bytesRead < 0 {
                         if errno != EAGAIN
                         {
-                            print("Read failed, errno (\(errno)): \(strerror(errno))")
+                            Log.debug("Read failed, errno (\(errno)): \(strerror(errno))")
                             handleReadError(errno)
                         } else {
                             // try again later
@@ -178,7 +177,7 @@ public class CFSocketClient : Stream {
                         // error?
                         handleWriteError(errno)
                     } else {
-                        print("0 bytes sent")
+                        Log.debug("0 bytes sent")
                     }
 
                     if numWritten >= 0 && numWritten < length {
