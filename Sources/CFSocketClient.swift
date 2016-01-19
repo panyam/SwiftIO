@@ -10,7 +10,7 @@
 import Foundation
 import Darwin
 
-public class CFSocketClient : Stream {
+public class CFSocketClient : Stream, DataSender, DataReceiver {
     public var consumer : StreamConsumer?
     public var producer : StreamProducer?
     var clientSocketNative : CFSocketNativeHandle
@@ -132,33 +132,74 @@ public class CFSocketClient : Stream {
             {
                 handleWriteError(EPIPE)
             }
-            if let (buffer, length) = consumer.readDataRequested() {
-                if length > 0 {
-                    let bytesRead = recv(clientSocketNative, buffer, length, MSG_DONTWAIT)
-                    if bytesRead > 0 {
-                        consumer.dataReceived(bytesRead)
-                    } else if bytesRead < 0 {
-                        if errno != EAGAIN
-                        {
-                            Log.debug("Read failed, errno (\(errno)): \(strerror(errno))")
-                            handleReadError(errno)
-                        } else {
-                            // try again later
-                            self.streamRunLoop.enqueueAfter(0.1) {
-                                self.hasBytesAvailable()
+            else
+            {
+//                let hasMoreData = consumer.canReceiveData(self)
+//                if hasMoreData
+//                {
+//                    if readsAreEdgeTriggered {
+//                        self.runLoop.enqueue {
+//                            self.hasBytesAvailable()
+//                        }
+//                    }
+//                    return
+//                }
+                if let (buffer, length) = consumer.readDataRequested() {
+                    if length > 0 {
+                        let bytesRead = recv(clientSocketNative, buffer, length, MSG_DONTWAIT)
+                        if bytesRead > 0 {
+                            consumer.dataReceived(bytesRead)
+                        } else if bytesRead < 0 {
+                            if errno != EAGAIN
+                            {
+                                Log.debug("Read failed, errno (\(errno)): \(strerror(errno))")
+                                handleReadError(errno)
+                            } else {
+                                // try again later
+                                self.streamRunLoop.enqueueAfter(0.1) {
+                                    self.hasBytesAvailable()
+                                }
                             }
+                        } else {
+                            // peer has closed so should we finish?
+                            consumer.dataReceived(bytesRead)
+                            clearReadyToRead()
+                            close()
                         }
-                    } else {
-                        // peer has closed so should we finish?
-                        consumer.dataReceived(bytesRead)
-                        clearReadyToRead()
-                        close()
+                        return
                     }
-                    return
                 }
             }
         }
         clearReadyToRead()
+    }
+    
+    public func read(buffer: ReadBufferType, length: LengthType) -> (LengthType, ErrorType?)
+    {
+        let numRead = recv(clientSocketNative, buffer, length, MSG_DONTWAIT)
+        if numRead > 0 {
+            return (numRead, nil)
+        } else if numRead < 0 && errno != EAGAIN {
+            // error?
+            return (numRead, SocketErrorType(domain: "POSIX", code: errno, message: "Socket read error"))
+        } else {
+            Log.debug("0 bytes sent")
+            return (0, nil)
+        }
+    }
+    
+    public func write(buffer: WriteBufferType, length: LengthType) -> (LengthType, ErrorType?)
+    {
+        let numWritten = send(clientSocketNative, buffer, length, MSG_DONTWAIT)
+        if numWritten > 0 {
+            return (numWritten, nil)
+        } else if numWritten < 0 {
+            // error?
+            return (numWritten, SocketErrorType(domain: "POSIX", code: errno, message: "Socket write error"))
+        } else {
+            Log.debug("0 bytes sent")
+            return (0, nil)
+        }
     }
     
     func canAcceptBytes() {
@@ -168,34 +209,47 @@ public class CFSocketClient : Stream {
             {
                 handleWriteError(EPIPE)
             }
-            else if let (buffer, length) = producer.writeDataRequested() {
-                if length > 0 {
-                    let numWritten = send(clientSocketNative, buffer, length, 0)
-                    if numWritten > 0 {
-                        producer.dataWritten(numWritten)
-                    } else if numWritten < 0 {
-                        // error?
-                        handleWriteError(errno)
-                    } else {
-                        Log.debug("0 bytes sent")
-                    }
-
-                    if numWritten >= 0 && numWritten < length {
-                        // only partial data written so dont clear writeable.
-                        // if this is the case then for an edge triggered API
-                        // we have to ensure that canAcceptBytes will eventually
-                        // get called.  So kick it off later on.
-                        // TODO: ensure that we have some kind of backoff so that
-                        // these async triggers dont flood the run loop if the write
-                        // stream is backed
-                        if writesAreEdgeTriggered {
-                            self.runLoop.enqueue {
-                                self.canAcceptBytes()
-                            }
+            else
+            {
+                let hasMoreData = producer.canSendData(self)
+                if hasMoreData
+                {
+                    if writesAreEdgeTriggered {
+                        self.runLoop.enqueue {
+                            self.canAcceptBytes()
                         }
-                        return
                     }
+                    return
                 }
+//                if let (buffer, length) = producer.writeDataRequested() {
+//                    if length > 0 {
+//                        let numWritten = send(clientSocketNative, buffer, length, 0)
+//                        if numWritten > 0 {
+//                            producer.dataWritten(numWritten)
+//                        } else if numWritten < 0 {
+//                            // error?
+//                            handleWriteError(errno)
+//                        } else {
+//                            Log.debug("0 bytes sent")
+//                        }
+//                        
+//                        if numWritten >= 0 && numWritten < length {
+//                            // only partial data written so dont clear writeable.
+//                            // if this is the case then for an edge triggered API
+//                            // we have to ensure that canAcceptBytes will eventually
+//                            // get called.  So kick it off later on.
+//                            // TODO: ensure that we have some kind of backoff so that
+//                            // these async triggers dont flood the run loop if the write
+//                            // stream is backed
+//                            if writesAreEdgeTriggered {
+//                                self.runLoop.enqueue {
+//                                    self.canAcceptBytes()
+//                                }
+//                            }
+//                            return
+//                        }
+//                    }
+//                }
             }
         }
         

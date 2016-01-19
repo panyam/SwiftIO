@@ -14,6 +14,7 @@ public protocol Writer {
      */
     var stream : Stream { get }
     
+    func flush()
     func write(value : UInt8, _ callback: CompletionCallback?)
     func write(buffer: WriteBufferType, length: LengthType, _ callback: IOCallback?)
 }

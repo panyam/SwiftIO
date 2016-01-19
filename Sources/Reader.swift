@@ -163,23 +163,23 @@ public extension Reader
     
     public func readInt8(callback : ((value : Int8, error : ErrorType?) -> Void)?)
     {
-        return readNBytes(1, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+        return readNBytes(1, bigEndian: true) {(value: Int64, error: ErrorType?) in
             callback?(value: Int8(truncatingBitPattern: (value & 0x00000000000000ff)), error: error)
-        })
+        }
     }
     
     public func readInt16(callback : ((value : Int16, error : ErrorType?) -> Void)?)
     {
-        return readNBytes(2, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+        return readNBytes(2, bigEndian: true) {(value: Int64, error: ErrorType?) in
             callback?(value: Int16(truncatingBitPattern: (value & 0x000000000000ffff)), error: error)
-        })
+        }
     }
     
     public func readInt32(callback : ((value : Int32, error : ErrorType?) -> Void)?)
     {
-        return readNBytes(4, bigEndian: true, callback: {(value: Int64, error: ErrorType?) in
+        return readNBytes(4, bigEndian: true) {(value: Int64, error: ErrorType?) in
             callback?(value: Int32(truncatingBitPattern: (value & 0x00000000ffffffff)), error: error)
-        })
+        }
     }
     
     public func readInt64(callback : ((value : Int64, error : ErrorType?) -> Void)?)

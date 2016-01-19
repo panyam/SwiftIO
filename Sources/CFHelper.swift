@@ -122,7 +122,7 @@ public class CoreFoundationRunLoop : RunLoop
     }
 }
 
-public class CFStream : Stream
+public class CFStream : Stream, DataSender, DataReceiver
 {
     public var runLoop : RunLoop
     public var consumer : StreamConsumer?
@@ -226,6 +226,15 @@ public class CFStream : Stream
         // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
         if let consumer = self.consumer
         {
+//            let hasMoreData = consumer.canReceiveData(self)
+//            if hasMoreData
+//            {
+//                if readsAreEdgeTriggered {
+//                    self.runLoop.enqueue {
+//                        self.hasBytesAvailable()
+//                    }
+//                }
+//            }
             if let (buffer, length) = consumer.readDataRequested() {
                 if length > 0 {
                     let bytesRead = CFReadStreamRead(readStream, buffer, length);
@@ -319,39 +328,90 @@ public class CFStream : Stream
         }
     }
     
+    
+    public func read(buffer: ReadBufferType, length: LengthType) -> (LengthType, ErrorType?)
+    {
+        if (!CFReadStreamHasBytesAvailable(readStream))
+        {
+            return (0, nil)
+        }
+
+        let numRead = CFReadStreamRead(readStream, buffer, length)
+        if numRead > 0 {
+            return (numRead, nil)
+        } else if numRead < 0 {
+            // error?
+            return (numRead, SocketErrorType(domain: "POSIX", code: errno, message: "CFStream read error"))
+        } else {
+            Log.debug("0 bytes sent")
+            return (0, nil)
+        }
+    }
+
+    public func write(buffer: WriteBufferType, length: LengthType) -> (LengthType, ErrorType?)
+    {
+        if (!CFWriteStreamCanAcceptBytes(writeStream))
+        {
+            return (0, nil)
+        }
+        
+        let numWritten = CFWriteStreamWrite(writeStream, buffer, length)
+        if numWritten > 0 {
+            return (numWritten, nil)
+        } else if numWritten < 0 {
+            // error?
+            return (numWritten, SocketErrorType(domain: "POSIX", code: errno, message: "CFStream write error"))
+        } else {
+            Log.debug("0 bytes sent")
+            return (0, nil)
+        }
+    }
+    
     func canAcceptBytes() {
         if let producer = self.producer
         {
-            if let (buffer, length) = producer.writeDataRequested() {
-                if length > 0 {
-                    let numWritten = CFWriteStreamWrite(writeStream, buffer, length)
-                    if numWritten > 0 {
-                        producer.dataWritten(numWritten)
-                    } else if numWritten < 0 {
-                        // error?
-                        handleWriteError()
-                    } else {
-                        Log.debug("0 bytes sent")
-                    }
-                    
-                    if numWritten >= 0 && numWritten < length {
-                        // only partial data written so dont clear writeable.
-                        // if this is the case then for an edge triggered API
-                        // we have to ensure that canAcceptBytes will eventually
-                        // get called.  So kick it off later on.
-                        // TODO: ensure that we have some kind of backoff so that
-                        // these async triggers dont flood the run loop if the write
-                        // stream is backed
-                        if writesAreEdgeTriggered {
-                            self.runLoop.enqueue {
-                                self.canAcceptBytes()
-                            }
-                        }
-                        return
+            let hasMoreData = producer.canSendData(self)
+            if hasMoreData
+            {
+                if writesAreEdgeTriggered {
+                    self.runLoop.enqueue {
+                        self.canAcceptBytes()
                     }
                 }
             }
         }
+//        if let producer = self.producer
+//        {
+//            if let (buffer, length) = producer.writeDataRequested() {
+//                if length > 0 {
+//                    let numWritten = CFWriteStreamWrite(writeStream, buffer, length)
+//                    if numWritten > 0 {
+//                        producer.dataWritten(numWritten)
+//                    } else if numWritten < 0 {
+//                        // error?
+//                        handleWriteError()
+//                    } else {
+//                        Log.debug("0 bytes sent")
+//                    }
+//                    
+//                    if numWritten >= 0 && numWritten < length {
+//                        // only partial data written so dont clear writeable.
+//                        // if this is the case then for an edge triggered API
+//                        // we have to ensure that canAcceptBytes will eventually
+//                        // get called.  So kick it off later on.
+//                        // TODO: ensure that we have some kind of backoff so that
+//                        // these async triggers dont flood the run loop if the write
+//                        // stream is backed
+//                        if writesAreEdgeTriggered {
+//                            self.runLoop.enqueue {
+//                                self.canAcceptBytes()
+//                            }
+//                        }
+//                        return
+//                    }
+//                }
+//            }
+//        }
         
         // no more bytes so clear writeable
         clearReadyToWrite()

@@ -38,6 +38,7 @@ public class BufferedReader : Reader {
         {
             return (0, IOErrorType.Unavailable)
         } else {
+//            Log.debug("BR, Offset: \(dataBuffer.startOffset), EndOffset: \(dataBuffer.endOffset)")
             return (dataBuffer.advanceBy(1), nil)
         }
     }
@@ -63,29 +64,25 @@ public class BufferedReader : Reader {
      */
     public func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
-        let readBuffer = buffer
         let readLength = length
         
         if dataBuffer.length > 0
         {
             // then copy it
-            if buffer != nil
-            {
-                let readSize = min(length, dataBuffer.length)
-                readBuffer.assignFrom(dataBuffer.current, count: readSize)
-                dataBuffer.advanceBy(readSize)
-                callback?(length: readSize, error: nil)
-            } else {
-                // a nil buffer was passed so just return 0 to tell the caller we have data
-                callback?(length: 0, error: nil)
-            }
+            let readSize = min(length, dataBuffer.length)
+//            Log.debug("BR, Offset: \(dataBuffer.startOffset), Length: \(readSize)")
+            buffer.assignFrom(dataBuffer.current, count: readSize)
+            dataBuffer.advanceBy(readSize)
+            callback?(length: readSize, error: nil)
         } else {
-            dataBuffer.read(reader) { (length, error) in
+//            Log.debug("ReadLength before read: \(readLength)")
+            dataBuffer.read(reader) { (bytesRead, error) in
+//                Log.debug("ReadLength after read: \(readLength), Bytes Read: \(bytesRead)")
                 if error == nil
                 {
                     self.read(buffer, length: readLength, callback: callback)
                 } else {
-                    callback?(length: length, error: error)
+                    callback?(length: bytesRead, error: error)
                 }
             }
         }

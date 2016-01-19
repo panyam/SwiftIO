@@ -8,15 +8,15 @@
 
 import Foundation
 
-public let DEFAULT_BUFFER_LENGTH = 1024 * 1024
+public let DEFAULT_BUFFER_LENGTH = 16 * 1024
 
 public class Buffer
 {
     typealias BufferType = UnsafeMutablePointer<UInt8>
     private var bufferSize : LengthType = DEFAULT_BUFFER_LENGTH
     private var buffer : BufferType
-    private var startOffset : OffsetType = 0
-    private var endOffset : OffsetType = 0
+    var startOffset : OffsetType = 0
+    var endOffset : OffsetType = 0
     
     public var capacity : LengthType {
         return bufferSize
@@ -26,6 +26,12 @@ public class Buffer
         get {
             let out = endOffset - startOffset
             return max(out, 0)
+        }
+    }
+
+    public var isFull : Bool {
+        get {
+            return length < capacity
         }
     }
 
@@ -87,10 +93,18 @@ public class Buffer
         get {
             return buffer[startOffset + index]
         }
+        
+        set (value) {
+            buffer[startOffset + index] = value
+        }
     }
     
+    var refreshCount = 0
+    var readStarted  = false
     public func read(reader: Reader, callback: IOCallback?)
     {
+        assert(!readStarted)
+        readStarted = true
         if startOffset == endOffset
         {
             startOffset = 0
@@ -99,7 +113,10 @@ public class Buffer
         
         // TODO: see if needs resizing or moving or circular management
         assert(bufferSize > endOffset, "Needs some work here!")
+//        Log.debug("Refreshing buffer, Count: \(refreshCount), Length: \(bufferSize - endOffset)") ; refreshCount += 1
         reader.read(current, length: bufferSize - endOffset) { (length, error) in
+            self.readStarted = false
+//            Log.debug("Refreshed buffer, Count: \(self.refreshCount - 1), Length: \(length), Error: \(error)")
             if error == nil {
                 self.endOffset += length
                 if self.endOffset > self.bufferSize
@@ -107,6 +124,27 @@ public class Buffer
                     self.endOffset = 0
                 }
             }
+            callback?(length: length, error: error)
+        }
+    }
+    
+    public func write(value : UInt8)
+    {
+        if length < capacity
+        {
+            buffer[startOffset] = value
+            buffer.advancedBy(0)
+        }
+    }
+
+    public func write(writer: Writer, callback: IOCallback?)
+    {
+        // TODO: see if needs resizing or moving or circular management
+        assert(bufferSize > endOffset, "Needs some work here!")
+        writer.write(current, length: bufferSize - endOffset) {(length, error) in
+            writer.flush()
+            self.startOffset = 0
+            self.endOffset = 0
             callback?(length: length, error: error)
         }
     }

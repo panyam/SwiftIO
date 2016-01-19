@@ -34,6 +34,7 @@
 		F73A8CB41C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
 		F73A8CB51C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
 		F73A8CB61C245E5900352333 /* Buffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73A8CB21C245E5900352333 /* Buffer.swift */; };
+		F73F62471C4B16C2004D00E1 /* BufferedWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F73F62461C4B16C2004D00E1 /* BufferedWriter.swift */; };
 		F769F7A81C34CD8F00A59A75 /* IO.swift in Sources */ = {isa = PBXBuildFile; fileRef = F769F7A71C34CD8F00A59A75 /* IO.swift */; };
 		F7CF64451C2094B900493204 /* SwiftIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CF643A1C2094B900493204 /* SwiftIO.framework */; };
 		F7CF644A1C2094B900493204 /* SwiftIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7CF64491C2094B900493204 /* SwiftIOTests.swift */; };
@@ -108,6 +109,7 @@
 		F73A8CAB1C23A83C00352333 /* Streams.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Streams.swift; sourceTree = "<group>"; };
 		F73A8CB01C245C6500352333 /* BufferedReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferedReader.swift; sourceTree = "<group>"; };
 		F73A8CB21C245E5900352333 /* Buffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buffer.swift; sourceTree = "<group>"; };
+		F73F62461C4B16C2004D00E1 /* BufferedWriter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferedWriter.swift; sourceTree = "<group>"; };
 		F769F7A71C34CD8F00A59A75 /* IO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IO.swift; sourceTree = "<group>"; };
 		F7CF643A1C2094B900493204 /* SwiftIO.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftIO.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7CF643F1C2094B900493204 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -236,6 +238,7 @@
 				F7376F471C3A0B2C00CBAD38 /* DataWriter.swift */,
 				F7E170E01C474E1B00BE624D /* DebugGlobals.swift */,
 				F7F74C1A1C48CAE8005A5322 /* Logger.swift */,
+				F73F62461C4B16C2004D00E1 /* BufferedWriter.swift */,
 			);
 			name = Sources;
 			path = ../Sources;
@@ -426,6 +429,7 @@
 				F73A8CB31C245E5900352333 /* Buffer.swift in Sources */,
 				F7E170E11C474E1B00BE624D /* DebugGlobals.swift in Sources */,
 				F7F1304C1C2C00EE00CA528A /* FileStreams.swift in Sources */,
+				F73F62471C4B16C2004D00E1 /* BufferedWriter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -20,12 +20,22 @@ public protocol Stream {
     var producer : StreamProducer? { get set }
 }
 
+public protocol DataReceiver {
+    func read(buffer: ReadBufferType, length: LengthType) -> (LengthType, ErrorType?)
+}
+
 public protocol StreamConsumer {
     /**
      * Called when read error received.
      */
     func receivedReadError(error: ErrorType)
-    
+
+    /**
+     * Called when the stream has data to be received.
+     * receiver.read Can called by the consumer until data is left.
+     */
+//    func canReceiveData(receiver: DataReceiver) -> Bool
+
     /**
      * Called by the stream when it can pass data to be processed.
      * Returns a buffer (and length) into which at most length number bytes will be filled.
@@ -46,22 +56,37 @@ public protocol StreamConsumer {
     func streamClosed()
 }
 
+public protocol DataSender {
+    /**
+     * Called to write data to the underlying channel.
+     * If no more data can be written (0, nil) is returned.
+     *
+     */
+    func write(buffer: WriteBufferType, length: LengthType) -> (LengthType, ErrorType?)
+}
+
 public protocol StreamProducer {
     /**
      * Called when write error received.
      */
-    func receivedWriteError(error: SocketErrorType)
-    
+    func receivedWriteError(error: ErrorType)
+
     /**
-     * Called by the stream when it is ready to send data.
-     * Returns the number of bytes of data available.
+     * Called when the stream is available to send data.
+     * Can called by the producer until no more data is left or can be sent.
      */
-    func writeDataRequested() -> (buffer: WriteBufferType, length: LengthType)?
-    
-    /**
-     * Called into indicate numWritten bytes have been written.
-     */
-    func dataWritten(numWritten: LengthType)
+     func canSendData(sender: DataSender) -> Bool
+//
+//    /**
+//     * Called by the stream when it is ready to send data.
+//     * Returns the number of bytes of data available.
+//     */
+//    func writeDataRequested() -> (buffer: WriteBufferType, length: LengthType)?
+//    
+//    /**
+//     * Called into indicate numWritten bytes have been written.
+//     */
+//    func dataWritten(numWritten: LengthType)
     
     /**
      * Called when the parent stream is closed.
@@ -94,6 +119,7 @@ public protocol StreamServer {
  */
 public class StreamWriter : Writer, StreamProducer
 {
+    private var requestCount : UInt = 0
     private var writeRequests = [IORequest]()
     /**
      * The underlying connection object this is listening to.
@@ -109,6 +135,15 @@ public class StreamWriter : Writer, StreamProducer
         theStream = stream
     }
     
+    public func flush()
+    {
+//        if completion != nil {
+//            stream.runLoop.ensure {
+//                self.writeRequests.append(IORequest(buffer: nil, length: 0, callback: completion))
+//            }
+//        }
+    }
+    
     public func write(value: UInt8, _ callback: CompletionCallback?)
     {
         // TODO: has to be better way than creating a buffer each time!
@@ -121,19 +156,49 @@ public class StreamWriter : Writer, StreamProducer
     
     public func write(buffer: WriteBufferType, length: LengthType, _ callback: IOCallback?)
     {
+        requestCount += 1
         stream.runLoop.ensure {
-            self.writeRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
+            let request = IORequest(buffer: buffer, length: length, callback: callback)
+            request.requestId = self.requestCount
+            self.writeRequests.append(request)
             self.stream.setReadyToWrite()
         }
     }
     
-    public func receivedWriteError(error: SocketErrorType) {
-        for request in writeRequests {
-            request.invokeCallback(error)
-        }
-        writeRequests.removeAll()
+    public func streamClosed() {
+        receivedWriteError(IOErrorType.Closed)
     }
     
+    public func receivedWriteError(error: ErrorType) {
+        while !writeRequests.isEmpty
+        {
+            let nextRequest = writeRequests.removeFirst()
+            stream.runLoop.enqueue {
+                nextRequest.invokeCallback(error)
+            }
+        }
+    }
+    
+    public func canSendData(sender: DataSender) -> Bool {
+        while !writeRequests.isEmpty
+        {
+            let request = writeRequests.first!
+            let (bytesWritten, error) = sender.write(request.current, length: request.remaining)
+            if error != nil
+            {
+                receivedWriteError(error!)
+                return false
+            } else if bytesWritten == 0
+            {
+                // no more writes possible for now
+                return !writeRequests.isEmpty
+            } else {
+                dataWritten(bytesWritten)
+            }
+        }
+        return false
+    }
+
     /**
      * Called by the stream when it is ready to send data.
      * Returns the number of bytes of data available.
@@ -169,13 +234,6 @@ public class StreamWriter : Writer, StreamProducer
             }
         }
     }
-    
-    public func streamClosed() {
-        for request in writeRequests {
-            request.invokeCallback(IOErrorType.Closed)
-        }
-        writeRequests.removeAll()
-    }
 }
 
 /**
@@ -186,6 +244,7 @@ public class StreamWriter : Writer, StreamProducer
  * To over come this, this class provides read methods with async callbacks.
  */
 public class StreamReader : Reader, StreamConsumer {
+    private var requestCount : UInt = 0
     /**
      * The underlying connection object this is listening to.
      */
@@ -218,21 +277,34 @@ public class StreamReader : Reader, StreamConsumer {
     
     public func read(buffer: ReadBufferType, length: LengthType, callback: IOCallback?)
     {
-//        assert(self.readRequests.isEmpty)
+        assert(self.readRequests.isEmpty)
+        requestCount += 1
         stream.runLoop.ensure {
-            self.readRequests.append(IORequest(buffer: buffer, length: length, callback: callback))
+            let request = IORequest(buffer: buffer, length: length, callback: callback)
+            request.requestId = self.requestCount
+            self.readRequests.append(request)
             self.stream.setReadyToRead()
         }
     }
     
-    public func receivedReadError(error: ErrorType) {
+    public func canReceiveData(receiver: DataReceiver) -> Bool {
         while !readRequests.isEmpty
         {
-            let nextRequest = readRequests.removeFirst()
-            stream.runLoop.enqueue {
-                nextRequest.invokeCallback(error)
+            let request = readRequests.first!
+            let (bytesRead, error) = receiver.read(request.buffer.advancedBy(request.satisfied), length: request.remaining)
+            if error != nil
+            {
+                receivedReadError(error!)
+                return false
+            } else if bytesRead == 0
+            {
+                // no more writes possible for now
+                return !readRequests.isEmpty
+            } else {
+                dataReceived(bytesRead)
             }
         }
+        return false
     }
     
     public func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: LengthType)? {
@@ -240,10 +312,6 @@ public class StreamReader : Reader, StreamConsumer {
             return (request.buffer.advancedBy(request.satisfied), request.remaining)
         }
         return nil
-    }
-    
-    public func streamClosed() {
-        receivedReadError(IOErrorType.Closed)
     }
     
     /**
@@ -256,17 +324,31 @@ public class StreamReader : Reader, StreamConsumer {
         assert(!readRequests.isEmpty, "Read request queue cannot be empty when we have a data callback")
         if let request = readRequests.first {
             request.satisfied += length
-            //            if request.remaining() == 0 {
             // done so pop it off
             readRequests.removeFirst()
             request.invokeCallback(nil)
-            //            }
+        }
+    }
+    
+    public func streamClosed() {
+        receivedReadError(IOErrorType.Closed)
+    }
+    
+    public func receivedReadError(error: ErrorType) {
+        while !readRequests.isEmpty
+        {
+            let nextRequest = readRequests.removeFirst()
+            stream.runLoop.enqueue {
+                nextRequest.invokeCallback(error)
+            }
         }
     }
 }
 
 public class IORequest
 {
+    var requestId : UInt = 0
+    var boolSingleByte = false
     var buffer: ReadBufferType
     var length: LengthType
     var satisfied : LengthType = 0
@@ -279,6 +361,11 @@ public class IORequest
     }
     
     var remaining : LengthType { return length - satisfied }
+    var current : ReadBufferType {
+        get {
+            return buffer.advancedBy(satisfied)
+        }
+    }
     
     func invokeCallback(err: ErrorType?)
     {
