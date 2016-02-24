@@ -19,6 +19,7 @@ public class CFSocketClient : Stream, DataSender, DataReceiver {
     public var runLoop : RunLoop {
         return streamRunLoop
     }
+    var READER_HANDLES_READS = true
     var readsAreEdgeTriggered = false
     var writesAreEdgeTriggered = true
     var runLoopSource : CFRunLoopSource?
@@ -74,7 +75,7 @@ public class CFSocketClient : Stream, DataSender, DataReceiver {
         // time as it needs greedily
         if readsAreEdgeTriggered || true {
             streamRunLoop.enqueue {
-                self.hasBytesAvailable()
+//                self.hasBytesAvailable()
             }
         }
     }
@@ -83,7 +84,7 @@ public class CFSocketClient : Stream, DataSender, DataReceiver {
      * Indicates to the stream that no writes are required as yet and to not invoke the write callback
      * until explicitly required again.
      */
-    private func clearReadyToWrite() {
+    public func clearReadyToWrite() {
         disableSocketFlag(kCFSocketAutomaticallyReenableWriteCallBack)
     }
     
@@ -91,7 +92,7 @@ public class CFSocketClient : Stream, DataSender, DataReceiver {
      * Indicates to the stream that no writes are required as yet and to not invoke the write callback
      * until explicitly required again.
      */
-    private func clearReadyToRead() {
+    public func clearReadyToRead() {
         disableSocketFlag(kCFSocketAutomaticallyReenableReadCallBack)
     }
     
@@ -134,46 +135,29 @@ public class CFSocketClient : Stream, DataSender, DataReceiver {
             }
             else
             {
-//                let hasMoreData = consumer.canReceiveData(self)
-//                if hasMoreData
-//                {
-//                    if readsAreEdgeTriggered {
-//                        self.runLoop.enqueue {
-//                            self.hasBytesAvailable()
-//                        }
-//                    }
-//                    return
-//                }
-                if let (buffer, length) = consumer.readDataRequested() {
-                    if length > 0 {
-                        let bytesRead = recv(clientSocketNative, buffer, length, MSG_DONTWAIT)
-                        if bytesRead > 0 {
-                            consumer.dataReceived(bytesRead)
-                        } else if bytesRead < 0 {
-                            if errno != EAGAIN
-                            {
-                                Log.debug("Read failed, errno (\(errno)): \(strerror(errno))")
-                                handleReadError(errno)
-                            } else {
-                                // try again later
-                                self.streamRunLoop.enqueueAfter(0.1) {
-                                    self.hasBytesAvailable()
-                                }
-                            }
-                        } else {
-                            // peer has closed so should we finish?
-                            consumer.dataReceived(bytesRead)
-                            clearReadyToRead()
-                            close()
+                let hasMoreData = consumer.canReceiveData(self)
+                if hasMoreData
+                {
+                    if readsAreEdgeTriggered {
+                        self.runLoop.enqueue {
+                            self.hasBytesAvailable()
                         }
-                        return
                     }
+                    return
                 }
             }
         }
         clearReadyToRead()
     }
     
+    /**
+     * Reads upto a length number of bytes into the provided buffer.
+     * Returns:
+     *  A tuple of number of bytes and any errors:
+     *  +ve,null    =>  A successful read of at least 1 byte and no error
+     *  -1,error    =>  Error in the read along with the actual error.
+     *  0,nil       =>  No more data available (possibly for now).
+     */
     public func read(buffer: ReadBufferType, length: LengthType) -> (LengthType, ErrorType?)
     {
         let numRead = recv(clientSocketNative, buffer, length, MSG_DONTWAIT)
@@ -182,8 +166,11 @@ public class CFSocketClient : Stream, DataSender, DataReceiver {
         } else if numRead < 0 && errno != EAGAIN {
             // error?
             return (numRead, SocketErrorType(domain: "POSIX", code: errno, message: "Socket read error"))
+        } else if numRead == 0 {
+            // socket closed
+            return (0, IOErrorType.Closed)
         } else {
-            Log.debug("0 bytes sent")
+            Log.debug("0 bytes read")
             return (0, nil)
         }
     }
@@ -211,8 +198,8 @@ public class CFSocketClient : Stream, DataSender, DataReceiver {
             }
             else
             {
-                let hasMoreData = producer.canSendData(self)
-                if hasMoreData
+                let (hasMoreData, error) = producer.canSendData(self)
+                if hasMoreData && error == nil
                 {
                     if writesAreEdgeTriggered {
                         self.runLoop.enqueue {
@@ -221,35 +208,6 @@ public class CFSocketClient : Stream, DataSender, DataReceiver {
                     }
                     return
                 }
-//                if let (buffer, length) = producer.writeDataRequested() {
-//                    if length > 0 {
-//                        let numWritten = send(clientSocketNative, buffer, length, 0)
-//                        if numWritten > 0 {
-//                            producer.dataWritten(numWritten)
-//                        } else if numWritten < 0 {
-//                            // error?
-//                            handleWriteError(errno)
-//                        } else {
-//                            Log.debug("0 bytes sent")
-//                        }
-//                        
-//                        if numWritten >= 0 && numWritten < length {
-//                            // only partial data written so dont clear writeable.
-//                            // if this is the case then for an edge triggered API
-//                            // we have to ensure that canAcceptBytes will eventually
-//                            // get called.  So kick it off later on.
-//                            // TODO: ensure that we have some kind of backoff so that
-//                            // these async triggers dont flood the run loop if the write
-//                            // stream is backed
-//                            if writesAreEdgeTriggered {
-//                                self.runLoop.enqueue {
-//                                    self.canAcceptBytes()
-//                                }
-//                            }
-//                            return
-//                        }
-//                    }
-//                }
             }
         }
         

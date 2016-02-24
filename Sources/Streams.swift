@@ -14,6 +14,8 @@ public protocol Stream {
      */
     func setReadyToWrite()
     func setReadyToRead()
+    func clearReadyToWrite()
+    func clearReadyToRead()
     func close()
     var runLoop : RunLoop { get }
     var consumer : StreamConsumer? { get set }
@@ -21,7 +23,23 @@ public protocol Stream {
 }
 
 public protocol DataReceiver {
+    /**
+     * Reads upto a length number of bytes into the provided buffer.
+     * Returns:
+     *  A tuple of number of bytes and any errors:
+     *  +ve,null    =>  A successful read of at least 1 byte and no error
+     *  -1,error    =>  Error in the read along with the actual error.
+     *  0,nil       =>  No more data available (possibly for now).
+     */
     func read(buffer: ReadBufferType, length: LengthType) -> (LengthType, ErrorType?)
+}
+
+public protocol DataSender {
+    /**
+     * Called to write data to the underlying channel.
+     * If no more data can be written (0, nil) is returned.
+     */
+    func write(buffer: WriteBufferType, length: LengthType) -> (LengthType, ErrorType?)
 }
 
 public protocol StreamConsumer {
@@ -34,35 +52,12 @@ public protocol StreamConsumer {
      * Called when the stream has data to be received.
      * receiver.read Can called by the consumer until data is left.
      */
-//    func canReceiveData(receiver: DataReceiver) -> Bool
-
-    /**
-     * Called by the stream when it can pass data to be processed.
-     * Returns a buffer (and length) into which at most length number bytes will be filled.
-     */
-    func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: LengthType)?
-    
-    /**
-     * Called to process data that has been received.
-     * It is upto the caller of this interface to consume *all* the data
-     * provided.
-     * @param   length  Number of bytes read.  0 if EOF reached.
-     */
-    func dataReceived(length: LengthType)
+    func canReceiveData(receiver: DataReceiver) -> Bool
     
     /**
      * Called when the parent stream is closed.
      */
     func streamClosed()
-}
-
-public protocol DataSender {
-    /**
-     * Called to write data to the underlying channel.
-     * If no more data can be written (0, nil) is returned.
-     *
-     */
-    func write(buffer: WriteBufferType, length: LengthType) -> (LengthType, ErrorType?)
 }
 
 public protocol StreamProducer {
@@ -75,18 +70,7 @@ public protocol StreamProducer {
      * Called when the stream is available to send data.
      * Can called by the producer until no more data is left or can be sent.
      */
-     func canSendData(sender: DataSender) -> Bool
-//
-//    /**
-//     * Called by the stream when it is ready to send data.
-//     * Returns the number of bytes of data available.
-//     */
-//    func writeDataRequested() -> (buffer: WriteBufferType, length: LengthType)?
-//    
-//    /**
-//     * Called into indicate numWritten bytes have been written.
-//     */
-//    func dataWritten(numWritten: LengthType)
+     func canSendData(sender: DataSender) -> (Bool, ErrorType?)
     
     /**
      * Called when the parent stream is closed.
@@ -179,7 +163,7 @@ public class StreamWriter : Writer, StreamProducer
         }
     }
     
-    public func canSendData(sender: DataSender) -> Bool {
+    public func canSendData(sender: DataSender) -> (Bool, ErrorType?) {
         while !writeRequests.isEmpty
         {
             let request = writeRequests.first!
@@ -187,16 +171,16 @@ public class StreamWriter : Writer, StreamProducer
             if error != nil
             {
                 receivedWriteError(error!)
-                return false
+                return (false, error)
             } else if bytesWritten == 0
             {
                 // no more writes possible for now
-                return !writeRequests.isEmpty
+                return (!writeRequests.isEmpty, nil)
             } else {
                 dataWritten(bytesWritten)
             }
         }
-        return false
+        return (false, nil)
     }
 
     /**
@@ -305,13 +289,6 @@ public class StreamReader : Reader, StreamConsumer {
             }
         }
         return false
-    }
-    
-    public func readDataRequested() -> (buffer: UnsafeMutablePointer<UInt8>, length: LengthType)? {
-        if let request = readRequests.first {
-            return (request.buffer.advancedBy(request.satisfied), request.remaining)
-        }
-        return nil
     }
     
     /**

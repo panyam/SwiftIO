@@ -204,7 +204,7 @@ public class CFStream : Stream, DataSender, DataReceiver
      * Indicates to the stream that no reads are required as yet and to not invoke the read callback
      * until explicitly required again.
      */
-    private func clearReadyToRead() {
+    public func clearReadyToRead() {
         let readEvents = CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
         self.registerReadEvents(readEvents)
     }
@@ -226,29 +226,13 @@ public class CFStream : Stream, DataSender, DataReceiver
         // It is safe to call CFReadStreamRead; it won’t block because bytes are available.
         if let consumer = self.consumer
         {
-//            let hasMoreData = consumer.canReceiveData(self)
-//            if hasMoreData
-//            {
-//                if readsAreEdgeTriggered {
-//                    self.runLoop.enqueue {
-//                        self.hasBytesAvailable()
-//                    }
-//                }
-//            }
-            if let (buffer, length) = consumer.readDataRequested() {
-                if length > 0 {
-                    let bytesRead = CFReadStreamRead(readStream, buffer, length);
-                    if bytesRead > 0 {
-                        consumer.dataReceived(bytesRead)
-                    } else if bytesRead < 0 {
-                        handleReadError()
-                    } else {
-                        // EOF reached
-                        consumer.dataReceived(bytesRead)
-                        clearReadyToRead()
-                        close()
+            let hasMoreData = consumer.canReceiveData(self)
+            if hasMoreData
+            {
+                if readsAreEdgeTriggered {
+                    self.runLoop.enqueue {
+                        self.hasBytesAvailable()
                     }
-                    return
                 }
             }
         }
@@ -310,7 +294,7 @@ public class CFStream : Stream, DataSender, DataReceiver
      * Indicates to the stream that no writes are required as yet and to not invoke the write callback
      * until explicitly required again.
      */
-    private func clearReadyToWrite() {
+    public func clearReadyToWrite() {
         let writeEvents = CFStreamEventType.ErrorOccurred.rawValue | CFStreamEventType.EndEncountered.rawValue
         self.registerWriteEvents(writeEvents)
     }
@@ -370,8 +354,8 @@ public class CFStream : Stream, DataSender, DataReceiver
     func canAcceptBytes() {
         if let producer = self.producer
         {
-            let hasMoreData = producer.canSendData(self)
-            if hasMoreData
+            let (hasMoreData, error) = producer.canSendData(self)
+            if hasMoreData && error == nil
             {
                 if writesAreEdgeTriggered {
                     self.runLoop.enqueue {
